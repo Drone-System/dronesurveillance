@@ -1,0 +1,36 @@
+@startuml User View use case diagram
+
+left to right direction
+
+actor User
+
+actor Area
+
+skinparam usecase {
+    BackgroundColor #FFFFFFFF
+}
+skinparam actor {
+    BackgroundColor #FFFFFFFF
+}
+
+package System  as "Drone Surveillance System"{
+    (Stream Video) as Sv
+    (Launch Drone) as Ld
+    (Alert)
+    (Threat)
+    (Stream Event Replay) as Ser
+    Alert <-- Threat : "<<include>>"
+    Alert -up-> Sv : "<<extends>>"
+    Alert -up-> Ser : "<<extends>>"
+    Alert -up-> Ld : "<<extends>>"
+}
+
+User --> Sv
+User --> Ld
+User --> Ser
+User <-- Alert
+Threat <-- Area
+Sv --> Area
+
+
+@enduml
