@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Flask Fixed Data</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>Base Stations</h1>
+    <ul class="basestation-list">
+        {% for item in items %}
+            <li>{{ item.name }} - {{ item.ip }}</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
