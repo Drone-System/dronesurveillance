@@ -1,0 +1,28 @@
+@startuml System Context Diagram
+
+skinparam component {
+    BackgroundColor #FFFFFF
+    BorderColor #333333
+    RoundCorner 100
+    FontStyle bold
+    FontSize 14
+}
+
+skinparam rectangle {
+    BackgroundColor #FFFFFF
+}
+
+skinparam actor {
+    BackgroundColor #FFFFFF
+}
+
+component sys as "Drone Surveillance System"
+rectangle Threat
+actor User
+
+User -right-> sys : Drone Commands
+sys -left-> User : Data\n(Video Stream,\n Notifications) 
+
+Threat -left-> sys : Detected
+
+@enduml

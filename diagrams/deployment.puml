@@ -1,0 +1,60 @@
+@startuml Deployment Diagram
+skinparam BackgroundColor #ffffffff
+
+<style>
+  element {
+    ' 💡 Set your desired color here
+    BackgroundColor #ffffffff
+    ' optional: change border color too
+    BorderColor #433838ff
+    ' FontColor #000000        ' optional: adjust text color
+  }
+</style>
+
+node Drone
+node Camera
+
+
+
+node EdgeServer {
+    interface DeviceInterface as "Device Interface"
+    component DeviceController as "Device Controller"
+    ' component ImageProcessor as "Image Pre-Processor"
+    DeviceController - DeviceInterface
+    port Wifi
+    ' port OtherPort
+    DeviceInterface - Wifi
+    ' ImageProcessor - DeviceController
+    portout OutPort as "out"
+    OutPort - DeviceController 
+    
+} 
+
+Cloud CloudServer as "Cloud" {
+    component WebInterface as "Controller Interface"
+    component NotificationService as "Notification Service"
+    component VideoReceiver as "Video Receiver"
+    component ImagePostProcessor as "Image Post-Processor"
+    database Database
+
+    VideoReceiver -right- ImagePostProcessor
+    NotificationService -up- WebInterface
+    ImagePostProcessor -right- NotificationService
+
+}
+
+
+
+Wifi )-up-"1..n" Camera 
+': "Secure protocol (TBD)"
+Wifi )-up-"0..n" Drone : "UDP"
+OutPort "1..n"-right-- VideoReceiver
+
+actor User
+User -down- WebInterface
+
+Database -down- ImagePostProcessor
+Database -right- WebInterface
+Database -down- VideoReceiver
+
+@enduml
