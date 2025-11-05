@@ -3,6 +3,7 @@ from flask_login import LoginManager, UserMixin, login_user, login_required, log
 import pandas as pd
 import psycopg
 import time
+import os
 
 # -------------------- Database --------------------
 # Retry connection logic for Docker startup
@@ -90,7 +91,7 @@ def login():
         return redirect(url_for("home"))
     
     if request.method == "POST":
-        username = request.form.get("username", "").strip()
+        username = request.form.get("username", "")
         password = request.form.get("password", "")
 
         if not username or not password:
@@ -99,7 +100,7 @@ def login():
         try:
             with conn.cursor() as cur:
                 # Check if verify_user function returns true
-                cur.execute("SELECT verify_user(%s, %s)", (username, password))
+                cur.execute("SELECT verify_user(%s::text, %s::text)", (username, password))
                 result = cur.fetchone()
                 
                 print(f"Login attempt for user '{username}': verify_user returned {result}")

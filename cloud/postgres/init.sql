@@ -1,6 +1,6 @@
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 create table if not exists basestations (id serial primary key, name text, ip text);
-create table if not exists users (id integer, username text, password_salt uuid, password text, basestations Integer[]);
+create table if not exists users (id serial primary key, username text, password_salt uuid, password text, basestations Integer[]);
 CREATE OR REPLACE FUNCTION public.verify_user(in_username text, in_password text)          
   RETURNS boolean                                                                           
   LANGUAGE plpgsql                                                                          
@@ -38,5 +38,5 @@ CREATE OR REPLACE FUNCTION public.verify_user(in_username text, in_password text
  END;                                                                                                                  
  $procedure$;
 -- data:
-insert into basestations (name, ip) VALUES ('localhost', '127.0.0.1'),('based station', '69.420.69.420');
-call create_user('casper', 'stdpw1234', '{1,2}');
+-- insert into basestations (name, ip) VALUES ('localhost', '127.0.0.1'),('based station', '69.420.69.420');
+-- call create_user('casper', 'stdpw1234', '{1,2}');
