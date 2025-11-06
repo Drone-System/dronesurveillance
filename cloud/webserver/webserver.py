@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, request, url_for, flash, session
+from flask import Flask, render_template, redirect, request, url_for, flash, session, make_response
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 import pandas as pd
 import psycopg
@@ -71,6 +71,11 @@ def load_user(user_id):
         return None
     
     return None
+
+
+@webserver.before_request
+def debug_request():
+    print(f">>> {request.method} {request.path} | Authenticated={current_user.is_authenticated}")
 
 # -------------------- Routes --------------------
 @webserver.route("/")
@@ -165,12 +170,19 @@ def login():
     return render_template("login.html")
 
 @webserver.route("/logout")
-@login_required
 def logout():
-    """Logout and redirect to login"""
-    logout_user()
-    session.clear()
-    return redirect(url_for("login"))
+    print(f"[LOGOUT] Before logout: authenticated={current_user.is_authenticated}")
+    
+    logout_user()           # clear Flask-Login’s session
+    session.clear()         # clear Flask session
+    
+    # Explicitly remove the remember-me cookie
+    resp = make_response(redirect(url_for("login")))
+    resp.delete_cookie("remember_token")
+    
+    print(f"[LOGOUT] After logout: authenticated={current_user.is_authenticated}")
+    return resp
+
 
 @webserver.route("/home")
 @login_required
@@ -189,10 +201,12 @@ def home():
 # -------------------- Error handlers --------------------
 @webserver.errorhandler(404)
 def not_found(e):
-    """Handle 404 errors"""
-    if current_user.is_authenticated:
+    # Only redirect authenticated users away from invalid pages
+    if current_user.is_authenticated and request.endpoint not in ["logout", "login"]:
         return redirect(url_for("home"))
     return redirect(url_for("login"))
+
+
 
 @webserver.errorhandler(401)
 def unauthorized(e):
