@@ -81,7 +81,7 @@ def index():
 
 @webserver.route("/login", methods=["GET", "POST"])
 def login():
-    """Login page"""
+    """Login and registration page"""
     # Clear any corrupted session data
     if not current_user.is_authenticated:
         session.clear()
@@ -90,50 +90,76 @@ def login():
         return redirect(url_for("home"))
     
     if request.method == "POST":
-        username = request.form.get("username", "")
-        password = request.form.get("password", "")
-
-        if not username or not password:
-            return render_template("login.html", error="Username and password are required"), 400
-
-        try:
-            with conn.cursor() as cur:
-                # Check if verify_user function returns true
-                cur.execute("SELECT verify_user(%s::text, %s::text)", (username, password))
-                result = cur.fetchone()
-                
-                print(f"Login attempt for user '{username}': verify_user returned {result}")
-                
-                # Check if result exists and is True
-                if result and result[0] is True:
-                    cur.execute("SELECT id, username FROM users WHERE username = %s", (username,))
-                    user_row = cur.fetchone()
+        action = request.form.get("action", "")
+        
+        # REGISTRATION
+        if action == "register":
+            username = request.form.get("create_username", "")
+            password = request.form.get("create_password", "")
+            
+            if not username or not password:
+                return render_template("login.html", error="Username and password are required"), 400
+            
+            try:
+                with conn.cursor() as cur:
+                    # Call the stored procedure to create user
+                    cur.execute("CALL create_user(%s, %s)", (username, password))
+                    print(f"User '{username}' registered successfully")
                     
-                    if user_row:
-                        user_id = user_row[0]
-                        user = User(id=user_id, username=username)
-                        
-                        # Clear session before login to avoid conflicts
-                        session.clear()
-                        login_user(user, remember=True)
-                        print(f"User '{username}' (ID: {user_id}) logged in successfully")
-                        
-                        next_page = request.args.get('next')
-                        if next_page:
-                            return redirect(next_page)
-                        return redirect(url_for("home"))
-                    else:
-                        print(f"User '{username}' verified but not found in users table")
-                else:
-                    print(f"verify_user returned False or NULL for user '{username}'")
+                return render_template("login.html", success="Registration successful! Please login."), 200
                 
-        except Exception as e:
-            print(f"Login error: {e}")
-            import traceback
-            traceback.print_exc()
-            return render_template("login.html", error="An error occurred during login"), 500
+            except Exception as e:
+                print(f"Registration error: {e}")
+                import traceback
+                traceback.print_exc()
+                return render_template("login.html", error=f"Registration failed: {str(e)}"), 500
+        
+        # LOGIN
+        elif action == "login":
+            username = request.form.get("username", "")
+            password = request.form.get("password", "")
 
-        return render_template("login.html", error="Invalid username or password"), 401
+            if not username or not password:
+                return render_template("login.html", error="Username and password are required"), 400
+
+            try:
+                with conn.cursor() as cur:
+                    # Check if verify_user function returns true
+                    cur.execute("SELECT verify_user(%s::text, %s::text)", (username, password))
+                    result = cur.fetchone()
+                    
+                    print(f"Login attempt for user '{username}': verify_user returned {result}")
+                    
+                    # Check if result exists and is True
+                    if result and result[0] is True:
+                        cur.execute("SELECT id, username FROM users WHERE username = %s", (username,))
+                        user_row = cur.fetchone()
+                        
+                        if user_row:
+                            user_id = user_row[0]
+                            user = User(id=user_id, username=username)
+                            
+                            # Clear session before login to avoid conflicts
+                            session.clear()
+                            login_user(user, remember=True)
+                            print(f"User '{username}' (ID: {user_id}) logged in successfully")
+                            
+                            next_page = request.args.get('next')
+                            if next_page:
+                                return redirect(next_page)
+                            return redirect(url_for("home"))
+                        else:
+                            print(f"User '{username}' verified but not found in users table")
+                    else:
+                        print(f"verify_user returned False or NULL for user '{username}'")
+                    
+            except Exception as e:
+                print(f"Login error: {e}")
+                import traceback
+                traceback.print_exc()
+                return render_template("login.html", error="An error occurred during login"), 500
+
+            return render_template("login.html", error="Invalid username or password"), 401
 
     return render_template("login.html")
 
