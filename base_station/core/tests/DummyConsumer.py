@@ -1,11 +1,13 @@
 from flask import Flask, Response
 from kafka import KafkaConsumer
 import sys
+import datetime
 
 
 topic = "0_0"
-consumer = KafkaConsumer(topic, bootstrap_servers=['localhost:9092'])
-consumer2 = KafkaConsumer("0_1", bootstrap_servers=['localhost:9092'])
+consumer = KafkaConsumer(bootstrap_servers=['localhost:9092'])
+consumer.subscribe(topics=["0_0", "0_1"])
+# consumer2 = KafkaConsumer("0_1", bootstrap_servers=['localhost:9092'])
 app = Flask(__name__)
 
 @app.route('/')
@@ -25,7 +27,9 @@ def video():
 
 def kafks():
     for message in consumer:
-        print("1- ", len(message))
+        if message.topic != "0_1":
+            continue
+        print("1- ", datetime.datetime.now())
         yield (b'--frame\r\n'
         b'Content-Type: image/jpg\r\n\r\n' + message.value + b'\r\n\r\n')
         # # print(message.value)
@@ -38,8 +42,10 @@ def video2():
     # return kafks()
 
 def kafks1():
-    for message in consumer2:
-        print("2", len(message))
+    for message in consumer:
+        if message.topic != "0_1":
+            continue
+        print("2", datetime.datetime.now())
         yield (b'--frame\r\n'
         b'Content-Type: image/jpg\r\n\r\n' + message.value + b'\r\n\r\n')
         # # print(message.value)

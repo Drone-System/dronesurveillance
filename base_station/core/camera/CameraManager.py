@@ -13,7 +13,7 @@ class CameraManager:
         self.topic = id
         self.name = name
         # self.producer = KafkaProducer(bootstrap_servers=f"{os.getenv(KAFKA_BROKER_IP)}:{os.getenv(KAFKA_BROKER_PORT)}")
-        self.producer = KafkaProducer(bootstrap_servers="localhost:9092")
+        self.producer = KafkaProducer(bootstrap_servers="localhost:9092", enable_idempotence=True)
 
     def registerCamera(self, cam: Camera):
         cam.connect()
