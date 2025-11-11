@@ -87,22 +87,32 @@ def index():
 
 @webserver.route("/login", methods=["GET", "POST"])
 def login():
+
+    if current_user.is_authenticated:
+        return redirect(url_for("home"))
+    
     """Login and registration page"""
     # Clear any corrupted session data
     if not current_user.is_authenticated:
         session.clear()
-    
-    if current_user.is_authenticated:
-        return redirect(url_for("home"))
     
     if request.method == "POST":
         action = request.form.get("action", "")
         
         # REGISTRATION
         if action == "register":
+
+            with conn.cursor() as cur:
+                cur.execute("select username from users;")
+                rows = cur.fetchall()
+                usernames = [r[0] for r in rows]
+
             username = request.form.get("create_username", "")
             password = request.form.get("create_password", "")
             
+            if username in usernames:
+                return render_template("login.html", error="Username already in use"), 400
+
             if not username or not password:
                 return render_template("login.html", error="Username and password are required"), 400
             
@@ -189,7 +199,7 @@ def logout():
 def home():
     """Protected home page"""
     try:
-        data = pd.read_sql("SELECT name, ip FROM basestations", conn)
+        data = pd.read_sql("select name from basestations where id =ANY(select basestation_id from basestations_to_groups where group_id =ANY(select group_id from users_to_groups where user_id = %s));", conn, params=[current_user.id],)
         items = data.to_dict("records")
         return render_template("index.html", items=items, username=current_user.username)
     except Exception as e:
