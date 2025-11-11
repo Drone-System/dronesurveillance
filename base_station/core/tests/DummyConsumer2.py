@@ -4,7 +4,7 @@ import sys
 import datetime
 
 
-topic = "0_0"
+topic = "0_1"
 consumer = KafkaConsumer(bootstrap_servers=['localhost:9092'])
 consumer.subscribe(topics=[topic])
 app = Flask(__name__)
@@ -41,7 +41,7 @@ def index():
 #         # # print(message.value)
 #         # return message.value
 
-@app.route('/kaf/', methods=['GET'])
+@app.route('/kaf2/', methods=['GET'])
 def video():
     return Response(kafks(), mimetype='multipart/x-mixed-replace; boundary=frame')
     # print("Request")
@@ -57,4 +57,4 @@ def kafks():
         # return message.value
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0")
+    app.run(host="0.0.0.0", port=7000)
