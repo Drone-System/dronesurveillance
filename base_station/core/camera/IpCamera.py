@@ -17,14 +17,13 @@ class IpCamera(Camera):
             print("Error reading")
             return (False, None)
 
-        # ret, buffer = cv2.imencode(".jpg", frame)
-        # cv2.imshow("Hello", buffer)
+        ret, buffer = cv2.imencode(".jpg", frame)
         if not ret:
             print("Error encoding")
             return (False, None)
 
-        print(f"Doing stuff - {self.id} - {len(frame.tobytes())}")
-        return (True, frame.tobytes())
+        print(f"Doing stuff - {self.id} - {len(buffer.tobytes())}")
+        return (True, buffer.tobytes())
         
     def disconnect(self):
         self.cap.release()
