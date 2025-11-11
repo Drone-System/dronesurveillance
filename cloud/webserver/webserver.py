@@ -3,6 +3,7 @@ import pandas as pd
 import psycopg
 import time
 import os
+import ssl
 
 # -------------------- Database --------------------
 # Retry connection logic for Docker startup
@@ -81,22 +82,32 @@ def index():
 
 @webserver.route("/login", methods=["GET", "POST"])
 def login():
+
+    if current_user.is_authenticated:
+        return redirect(url_for("home"))
+    
     """Login and registration page"""
     # Clear any corrupted session data
     if not current_user.is_authenticated:
         session.clear()
-    
-    if current_user.is_authenticated:
-        return redirect(url_for("home"))
     
     if request.method == "POST":
         action = request.form.get("action", "")
         
         # REGISTRATION
         if action == "register":
+
+            with conn.cursor() as cur:
+                cur.execute("select username from users;")
+                rows = cur.fetchall()
+                usernames = [r[0] for r in rows]
+
             username = request.form.get("create_username", "")
             password = request.form.get("create_password", "")
             
+            if username in usernames:
+                return render_template("login.html", error="Username already in use"), 400
+
             if not username or not password:
                 return render_template("login.html", error="Username and password are required"), 400
             
@@ -174,9 +185,34 @@ def logout():
 @webserver.route("/home")
 @login_required
 def home():
-    # Convert DataFrame to list of dictionaries
-    items = data.to_dict('records')
-    return render_template("index.html", items=items)
+    """Protected home page"""
+    try:
+        data = pd.read_sql("select name from basestations where id =ANY(select basestation_id from basestations_to_groups where group_id =ANY(select group_id from users_to_groups where user_id = %s));", conn, params=[current_user.id],)
+        items = data.to_dict("records")
+        return render_template("index.html", items=items, username=current_user.username)
+    except Exception as e:
+        print(f"Error loading home page: {e}")
+        logout_user()
+        session.clear()
+        return redirect(url_for("login"))
 
+# -------------------- Error handlers --------------------
+@webserver.errorhandler(404)
+def not_found(e):
+    # Only redirect authenticated users away from invalid pages
+    if current_user.is_authenticated and request.endpoint not in ["logout", "login"]:
+        return redirect(url_for("home"))
+    return redirect(url_for("login"))
+
+
+
+@webserver.errorhandler(401)
+def unauthorized(e):
+    """Handle unauthorized access"""
+    return redirect(url_for("login"))
+
+# -------------------- Run --------------------
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+    context.load_cert_chain('cert.pem', 'key.pem')
+    webserver.run('0.0.0.0', port=5000, ssl_context=context, debug=True)
