@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add {{ device_type }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>Add {{ device_type }}</h1>
+    <form method="POST">
+        <label for="ip">IP:</label>
+        <input type="text" name="ip" id="ip" placeholder="Enter IP address" required>
+        <br><br>
+
+        <label for="protocol">Video Protocol:</label>
+        <select name="protocol" id="protocol" required>
+            {% for protocol in protocols %}
+                <option value="{{ protocol }}">{{ protocol }}</option>
+            {% endfor %}
+        </select>
+        <br><br>
+
+        <button type="submit">Add {{ device_type }}</button>
+    </form>
+</body>
+</html>
