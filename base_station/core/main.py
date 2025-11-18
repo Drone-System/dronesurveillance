@@ -4,6 +4,7 @@ from DatabaseManager.DatabaseManager import DatabaseManager
 from multiprocessing import Process
 import ServerBaseStation_pb2_grpc
 import ServerBaseStation_pb2
+from environment import CONFIG
 
 def main():
     dbMan = DatabaseManager() # there must be passed credentials into DbManager read from a .env file
@@ -12,17 +13,18 @@ def main():
     # TODO: Change insecure channel https://github.com/grpc/grpc/tree/master/examples/python/auth
     # TODO: Make ip and port configurable in .env
     identifier = -1
-    name = "My name" #This should be written in a configuaration file
+    name = CONFIG.get("NAME") #This should be written in a configuaration file
+    address = f"{CONFIG.get("GRPC_REMOTE_IP")}:{CONFIG.get("GRPC_REMOTE_PORT")}"
     while identifier == -1:
         sleep(1)
-        async with grpc.aio.insecure_channel("localhost:50051") as channel:
+        async with grpc.aio.insecure_channel(address) as channel:
             stub = ServerBaseStation_pb2_grpc.CloudStub(channel)
             identifier =  await stub.Connec(ServerBaseStation_pb2.ConnectToCloudRequest(name))
 
     camManager = CameraManager(identifier, name, dbMan)
 
     camManager.run()
-    
+
 
     
 
