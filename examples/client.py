@@ -106,13 +106,15 @@ class WebRTCProducer:
 
 
 async def run() -> None:
-    async with grpc.aio.insecure_channel("localhost:50051") as channel:
-        stub = ServerBaseStation_pb2_grpc.WebRtcStub(channel)
-        response = await stub.Connect(ServerBaseStation_pb2_grpc.ConnectRequest())
-        response = await stub.Register(ServerBaseStation_pb2_grpc.RegisterProducerRequest("a", "MyStream"))
-        response = await stub.Register(
-            ServerBaseStation_pb2_grpc.Stream(
-                stream_id=response.stream_id, ))
+    # async with grpc.aio.insecure_channel("localhost:50051") as channel:
+    channel = grpc.aio.insecure_channel("localhost:50051")
+    stub = ServerBaseStation_pb2_grpc.WebRtcStub(channel)
+    response = await stub.Connect(ServerBaseStation_pb2.ConnectRequest(session_id="ESTOU ME ACAGGARE"))
+    await channel.close()
+        # response = await stub.Register(ServerBaseStation_pb2_grpc.RegisterProducerRequest("a", "MyStream"))
+        # response = await stub.Register(
+        #     ServerBaseStation_pb2_grpc.Stream(
+        #         stream_id=response.stream_id, ))
 
 
 if __name__ == "__main__":
