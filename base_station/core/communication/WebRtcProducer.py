@@ -15,7 +15,7 @@ class WebRTCProducer:
         self.stream_name = stream_name
         self.source = source
         self.stream_id = None
-        # self.pc = RTCPeerConnection()  # Only one peer connection per camera
+        self.pc = RTCPeerConnection()  # Only one peer connection per camera
         
     async def __on_start_stream(self):
         print("Stream Starting")
@@ -24,7 +24,7 @@ class WebRTCProducer:
         # Handle ICE candidates
         @self.pc.on("icecandidate")
         async def on_icecandidate(candidate):
-            # print("Hello"+ candidate)
+            print("In ice")
             if candidate:
                 response = await self.stub.IceCandidateRequest(
                     candidate=candidate.candidate, 
@@ -39,11 +39,6 @@ class WebRTCProducer:
                 )
                 await pc.addIceCandidate(candidate)
                 
-        # Add video track
-        # video_track = CameraVideoTrack(self.camera_id)
-        
-        # self.pc.addTrack(video_track)
-        # self.source = MediaPlayer("/dev/video2")
         self.pc.addTrack(self.source)
         
         offer = await self.pc.createOffer()
@@ -57,7 +52,7 @@ class WebRTCProducer:
         if hasattr(self, 'channel'):
             await self.channel.close()
     
-    async def start(self, q: Queue):
+    async def start(self, q):
         print(f"Starting producer: {self.stream_name}")
         self.q = q
         
@@ -86,18 +81,10 @@ class WebRTCProducer:
         await self.pc.setRemoteDescription(
             RTCSessionDescription(sdp=response.answer.sdp, type=response.answer.type)
         )
+        print("Setted Remote")
         # Keep running
         try:
-            while True:
-                # CHECK KEEP Alive
-                if not q.empty():
-                    print("QUEUE NOT")
-                    message = q.get_nowait()
-                    if message == 1:
-                        await self.__cleanup()
-                        exit(0)
-                else:
-                    print("EMTPY")
+            while not self.q.is_set():
                 await asyncio.sleep(1)
         except KeyboardInterrupt:
             print("\nStopping producer...")

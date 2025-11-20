@@ -30,7 +30,7 @@ class CameraManager:
         self.name = name
         self.dbMan = dbMan
     
-    def run(self):
+    async def run(self):
 
         while True:
             try:
@@ -41,19 +41,19 @@ class CameraManager:
                     if cam not in self.cameras:
                         # start process
                         print(f"New Camera {cam} detected.")
-                        to_add.update(self.__registerCamera(cam))
+                        to_add.update(self.__registerCamera(cam, asyncio.get_running_loop()))
 
                 for cam in self.cameras.keys():
                     if cam not in cameras:
                         # stop process
                         print(f"Camera {cam} removed.")
-                        self.__removeCamera(cam)
+                        await self.__removeCamera(cam)
                         to_remove.append(cam)
                 
                 self.cameras.update(to_add)
                 for c in to_remove:
                     self.cameras.pop(c)
-                sleep(10) # check every 10 seconds
+                await asyncio.sleep(10) # check every 10 seconds
 
             except KeyboardInterrupt:
                 print("\nStopping producer...")
@@ -64,35 +64,37 @@ class CameraManager:
 
         print("Finally")
         print(self.cameras)
-        for p, q in self.cameras.values():
-            q.put(1)
-            p.join()
+        for task, signal in self.cameras.values():
+            signal.set(True)
+            await task
             exit(0)
         
 
 
-    def __registerCamera(self, cam: int):
-        # camera = self.dbMan.getCameraById(cam) # somewhere inside this should call protocol transformer
+    def __registerCamera(self, cam: int, event_loop):
+        camera = self.dbMan.getCameraById(cam) # somewhere inside this should call protocol transformer
+        # camera = IpCamera("")
         cam_name = self.dbMan.GetCameraNameById(cam)
-        source = IpCamera("udp://127.0.0.1:3000")
-        # source = MediaPlayer("/dev/video2").video
         print("Opened cam")
-        producer = WebRTCProducer(basestation_id=self.identifier, source=source, stream_name=cam_name)
+        producer = WebRTCProducer(basestation_id=self.identifier, source=camera, stream_name=cam_name)
         # self.cameras[cam] = multiprocessing.Process() This should span a process where the webrtc producer runs
-        q = Queue(maxsize=3)
+        # q = Queue(maxsize=3)
+        signal = asyncio.Event()
+        # await producer.start(signal)
         print("Starting process...")
-        p = Process(target=self.__run_producer, args=(producer, q), daemon=False)
-        p.start()
-        return {cam: (p, q)}
+        # p = Process(target=self.__run_producer, args=(producer, q), daemon=False)
+        task = event_loop.create_task(producer.start(signal))
+        print("created")
+        return {cam: (task, signal)}
 
-    def __run_producer(self, producer, q):
-        asyncio.run(producer.start(q))
+    # def __run_producer(self, producer, signal):
+    #     asyncio.run(producer.start(signal))
     
-    def __removeCamera(self, cam: int):
+    async def __removeCamera(self, cam: int):
         process, q = self.cameras[cam]
-        q.put(1)
+        q.set()
         # self.cameras.pop(cam)
-        process.join()
+        await process
         
 
     # def __processCameras(self):
