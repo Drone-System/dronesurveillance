@@ -7,3 +7,6 @@ __pycache__
 
 # ignore grpc generated files
 *pb2*
+
+# ignore vscode files
+.vscode

@@ -28,7 +28,7 @@ async def main():
 
     camManager = CameraManager(identifier, name, dbMan)
 
-    camManager.run()
+    await camManager.run()
 
 
     
