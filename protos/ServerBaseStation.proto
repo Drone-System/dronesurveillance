@@ -19,36 +19,46 @@ service WebRtc {
     rpc Connect (ConnectRequest) returns (ConnectResponse) {};
     rpc Register (RegisterProducerRequest) returns (RegisterProducerResponse) {};
     rpc Stream (StreamOffer) returns (StreamAnswer) {};
-    // rpc IceCandidate (IceCandidateRequest) returns (IceCandidateResponse) {};
+    rpc IceCandidate (IceCandidateRequest) returns (IceCandidateResponse) {};
     // rpc ViewerJoin (ViewerJoinedRequest) returns (ViewerJoinedResponse) {};
 }
 
 
 message RegisterProducerRequest {
-    string name = 1;
+    string sid = 1;
+    string name = 2;
 }
-message RegisterProducerResponse {}
+message RegisterProducerResponse {
+    string stream_id = 1;
+    string viewer_sid = 2;
+}
 
-message Candidate {
+// message Candidate {
+//     string candidate = 1;
+//     string sdpMid = 2;
+//     uint32 sdp_MLinIndex = 3;
+// }
+
+message IceCandidateRequest {
     string candidate = 1;
     string sdpMid = 2;
     uint32 sdp_MLinIndex = 3;
 }
-
-message IceCandidateRequest {
-    string target_sid = 1;
-    Candidate candidate = 2;
-}
-message IceCandidateResponse {} // Maybe this needs to respond with something
+message IceCandidateResponse {
+    string candidate = 1;
+    string sdpMid = 2;
+    uint32 sdp_MLinIndex = 3;
+} // Maybe this needs to respond with something
 
 message StreamDesc {
     string type = 1;
     string sdp = 2;
 }
 message StreamOffer {
-    string stream_id = 1;
-    string viewer_sid = 2;
-    StreamDesc offer = 3;
+    string sid = 1;
+    string stream_id = 2;
+    string viewer_sid = 3;
+    StreamDesc offer = 4;
 }
 message StreamAnswer {
     string stream_id = 1;

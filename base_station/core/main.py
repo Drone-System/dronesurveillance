@@ -5,9 +5,14 @@ from multiprocessing import Process
 import ServerBaseStation_pb2_grpc
 import ServerBaseStation_pb2
 from environment import CONFIG
+import asyncio
+from time import sleep
+import grpc
 
-def main():
-    dbMan = DatabaseManager() # there must be passed credentials into DbManager read from a .env file
+async def main():
+    dbMan = DatabaseManager(
+
+    ) # there must be passed credentials into DbManager read from a .env file
 
     # DO routine connection to cloud
     # TODO: Change insecure channel https://github.com/grpc/grpc/tree/master/examples/python/auth
@@ -15,11 +20,11 @@ def main():
     identifier = -1
     name = CONFIG.get("NAME") #This should be written in a configuaration file
     address = f"{CONFIG.get("GRPC_REMOTE_IP")}:{CONFIG.get("GRPC_REMOTE_PORT")}"
-    while identifier == -1:
-        sleep(1)
-        async with grpc.aio.insecure_channel(address) as channel:
-            stub = ServerBaseStation_pb2_grpc.CloudStub(channel)
-            identifier =  await stub.Connec(ServerBaseStation_pb2.ConnectToCloudRequest(name))
+    # while identifier == -1:
+    #     sleep(1)
+    #     async with grpc.aio.insecure_channel(address) as channel:
+    #         stub = ServerBaseStation_pb2_grpc.CloudStub(channel)
+    #         identifier =  await stub.Connect(ServerBaseStation_pb2.ConnectToCloudRequest(name=name))
 
     camManager = CameraManager(identifier, name, dbMan)
 
@@ -29,4 +34,4 @@ def main():
     
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
