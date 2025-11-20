@@ -1,15 +1,18 @@
 # from ..DatabaseManager import DatabaseManager
-from .Camera import Camera
+# from .Camera import Camera
 from kafka import KafkaProducer 
 from dotenv import load_dotenv
 import os
 import threading
 from multiprocessing import Process
-from ..DatabaseManager.DatabaseManager import DatabaseManager
-from .Protocol import cameraTypeTranslator
-from .WebRtcProducer import WebRTCProducer
+from DatabaseManager.DatabaseManager import DatabaseManager
+# from Protocol import cameraTypeTranslator
+from communication.WebRtcProducer import WebRTCProducer
 from multiprocessing import Process, Queue
 import asyncio
+from time import sleep
+from aiortc.contrib.media import MediaPlayer
+from camera.IpCamera import IpCamera
 
 class CameraManager:
     
@@ -30,36 +33,65 @@ class CameraManager:
     def run(self):
 
         while True:
-            cameras: list[int] = self.dbMan.pollCameras()
-            for cam in cameras:
-                if cam not in self.cameras:
-                    newCamera = self.__registerCamera(cam)
-                    # self.cameras[cam] = Process()
-                    pass
-            for cam in self.cameras.keys():
-                if cam not in cameras:
-                    # stop process
-                    self.__removeCamera(cam)
+            try:
+                cameras: list[int] = self.dbMan.pollCameras()
+                to_add = {}
+                to_remove = []
+                for cam in cameras:
+                    if cam not in self.cameras:
+                        # start process
+                        print(f"New Camera {cam} detected.")
+                        to_add.update(self.__registerCamera(cam))
 
-            sleep(10) # check every 10 seconds
+                for cam in self.cameras.keys():
+                    if cam not in cameras:
+                        # stop process
+                        print(f"Camera {cam} removed.")
+                        self.__removeCamera(cam)
+                        to_remove.append(cam)
+                
+                self.cameras.update(to_add)
+                for c in to_remove:
+                    self.cameras.pop(c)
+                sleep(10) # check every 10 seconds
+
+            except KeyboardInterrupt:
+                print("\nStopping producer...")
+                break
+            except Exception as e:
+                print("EXCEPTION: ", e)
+                break
+
+        print("Finally")
+        print(self.cameras)
+        for p, q in self.cameras.values():
+            q.put(1)
+            p.join()
+            exit(0)
+        
 
 
     def __registerCamera(self, cam: int):
-        camera = self.dbMan.getCameraById(cam) # somewhere inside this should call protocol transformer
+        # camera = self.dbMan.getCameraById(cam) # somewhere inside this should call protocol transformer
         cam_name = self.dbMan.GetCameraNameById(cam)
-        producer = WebRTCProducer(basestation_id=self.identifier, source=camera, stream_name=cam_name)
+        source = IpCamera("udp://127.0.0.1:3000")
+        # source = MediaPlayer("/dev/video2").video
+        print("Opened cam")
+        producer = WebRTCProducer(basestation_id=self.identifier, source=source, stream_name=cam_name)
         # self.cameras[cam] = multiprocessing.Process() This should span a process where the webrtc producer runs
         q = Queue(maxsize=3)
-        p = Process(target=asyncio.run, args=(producer.start(q)))
-        self.cameras[cam] = (p, q)
-        q.start()
+        print("Starting process...")
+        p = Process(target=self.__run_producer, args=(producer, q), daemon=False)
         p.start()
+        return {cam: (p, q)}
 
+    def __run_producer(self, producer, q):
+        asyncio.run(producer.start(q))
     
-    def __removeCamera(self, cam):
+    def __removeCamera(self, cam: int):
         process, q = self.cameras[cam]
         q.put(1)
-        self.cameras.pop(cam)
+        # self.cameras.pop(cam)
         process.join()
         
 

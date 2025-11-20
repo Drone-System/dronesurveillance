@@ -1,6 +1,6 @@
 # from .Camera import Camera
 import cv2
-
+from aiortc import VideoStreamTrack
 # class IpCamera(Camera):
 #     def __init__(self, url):
 #         super().__init__()
@@ -32,12 +32,13 @@ import cv2
 class IpCamera(VideoStreamTrack):
     """Video track that captures from webcam"""
     
-    def __init__(self, connection_string=0):
+    def __init__(self, connection_string):
         super().__init__()
         self.cap = cv2.VideoCapture(connection_string)
         self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
         self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
         self.cap.set(cv2.CAP_PROP_FPS, 24)
+        print("Is cap opened: " + str(self.cap.isOpened()))
         
     async def recv(self):
         pts, time_base = await self.next_timestamp()
@@ -54,7 +55,7 @@ class IpCamera(VideoStreamTrack):
         video_frame = VideoFrame.from_ndarray(frame, format="rgb24")
         video_frame.pts = pts
         video_frame.time_base = time_base
-        
+        print(video_frame)
         return video_frame
     
     def __del__(self):

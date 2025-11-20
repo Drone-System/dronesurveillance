@@ -1,0 +1,32 @@
+services:
+  # webserver:
+  #   build: webserver/
+  #   container_name: server
+  #   ports:
+  #     - 5000:5000
+  #   depends_on:
+  #     db:
+  #       condition: service_healthy
+  #       restart: true
+
+  db:
+    image: postgres:17
+    container_name: postgres_db
+    volumes:
+     - db:/var/lib/postgresql/data/
+     - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - 5432:5432 # to remove after dev
+    environment:
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
+
+volumes:
+  db:
