@@ -47,7 +47,8 @@ class WebRTCProducer:
 
     async def __cleanup(self):
         print("Closing pc")
-        await self.pc.close()
+        await self.stub.Disconnect(ServerBaseStation_pb2.DisconnectRequest(stream_id=self.sid))
+        # await self.pc.close()
         print("closing Channel")
         if hasattr(self, 'channel'):
             await self.channel.close()
@@ -59,21 +60,20 @@ class WebRTCProducer:
         # await self.sio.connect(self.server_url)
         address = f"{CONFIG.get('GRPC_REMOTE_IP')}:{CONFIG.get('GRPC_REMOTE_PORT')}"
         self.channel = channel = grpc.aio.insecure_channel(address)
-
+        print("some")
         self.stub = ServerBaseStation_pb2_grpc.WebRtcStub(channel)
+        print("some")
         response = await self.stub.Connect(ServerBaseStation_pb2.ConnectRequest())
-
+        print("some")
         # generate session id
-        sid = str(uuid.uuid4())
-        name = f"{self.basestation_id}/{sid}"
-        response = await self.stub.Register(ServerBaseStation_pb2.RegisterProducerRequest(sid=sid, name=name))
-
+        self.sid = str(uuid.uuid4())
+        self.name = f"{self.basestation_id}/{self.sid}"
+        response = await self.stub.Register(ServerBaseStation_pb2.RegisterProducerRequest(sid=self.sid, name=self.name))
+        print("some")
         await self.__on_start_stream()
         response = await self.stub.Stream(
             ServerBaseStation_pb2.StreamOffer(
-                sid=sid,
-                stream_id=response.stream_id, 
-                viewer_sid=response.viewer_sid, 
+                stream_id=self.sid, 
                 offer=ServerBaseStation_pb2.StreamDesc(
                     type=self.pc.localDescription.type,
                     sdp=self.pc.localDescription.sdp)))

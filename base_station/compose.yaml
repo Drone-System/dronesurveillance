@@ -9,12 +9,14 @@ services:
   #       condition: service_healthy
   #       restart: true
 
-  core:
-    build: core/
-    container_name: core
-    env_file: "core/.env"
-    ports:
-      - 3000:3000
+  # core:
+  #   build: core/
+  #   container_name: core
+  #   env_file: "core/.env"
+  #   ports:
+  #     - 3000:3000
+    # volumes:
+    #   - /dev/video0:/dev/video0
     # devices:
     #   - "/dev/video0:/dev/video0"
     #   - "/dev/video2:/dev/video2"

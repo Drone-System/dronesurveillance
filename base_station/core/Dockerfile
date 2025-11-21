@@ -37,7 +37,8 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY --from=builder /app /app
-
+EXPOSE 3000/udp
+EXPOSE 3000/tcp
 # RUN python -m grpc_tools.protoc \
 #     -I./protos \
 #     --python_out=. \
