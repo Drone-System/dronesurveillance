@@ -20,7 +20,7 @@ service WebRtc {
     rpc Register (RegisterProducerRequest) returns (RegisterProducerResponse) {};
     rpc Stream (StreamOffer) returns (StreamAnswer) {};
     rpc IceCandidate (IceCandidateRequest) returns (IceCandidateResponse) {};
-    // rpc ViewerJoin (ViewerJoinedRequest) returns (ViewerJoinedResponse) {};
+    rpc Disconnect (DisconnectRequest) returns (DisconnectResponse) {};
 }
 
 
@@ -55,10 +55,8 @@ message StreamDesc {
     string sdp = 2;
 }
 message StreamOffer {
-    string sid = 1;
-    string stream_id = 2;
-    string viewer_sid = 3;
-    StreamDesc offer = 4;
+    string stream_id = 1;
+    StreamDesc offer = 2;
 }
 message StreamAnswer {
     string stream_id = 1;
@@ -66,11 +64,10 @@ message StreamAnswer {
 }
 
 message ConnectRequest {
-    string session_id = 1;
 }
 message ConnectResponse {}
 
-message ViewerJoinedRequest {
-    string viewer_sid = 1;
+message DisconnectRequest {
+    string stream_id = 1;
 }
-message ViewerJoinedResponse {}
+message DisconnectResponse {}
