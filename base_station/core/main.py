@@ -19,7 +19,7 @@ async def main():
     # TODO: Make ip and port configurable in .env
     identifier = -1
     name = CONFIG.get("NAME") #This should be written in a configuaration file
-    address = f"{CONFIG.get("GRPC_REMOTE_IP")}:{CONFIG.get("GRPC_REMOTE_PORT")}"
+    address = f"{CONFIG.get('GRPC_REMOTE_IP')}:{CONFIG.get('GRPC_REMOTE_PORT')}"
     # while identifier == -1:
     #     sleep(1)
     #     async with grpc.aio.insecure_channel(address) as channel:
@@ -27,7 +27,7 @@ async def main():
     #         identifier =  await stub.Connect(ServerBaseStation_pb2.ConnectToCloudRequest(name=name))
 
     camManager = CameraManager(identifier, name, dbMan)
-
+    print("Started")
     await camManager.run()
 
 

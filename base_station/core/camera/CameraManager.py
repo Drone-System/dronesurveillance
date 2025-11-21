@@ -1,14 +1,11 @@
 # from ..DatabaseManager import DatabaseManager
 # from .Camera import Camera
-from kafka import KafkaProducer 
 from dotenv import load_dotenv
 import os
 import threading
-from multiprocessing import Process
 from DatabaseManager.DatabaseManager import DatabaseManager
 # from Protocol import cameraTypeTranslator
 from communication.WebRtcProducer import WebRTCProducer
-from multiprocessing import Process, Queue
 import asyncio
 from time import sleep
 from aiortc.contrib.media import MediaPlayer
@@ -65,7 +62,7 @@ class CameraManager:
         print("Finally")
         print(self.cameras)
         for task, signal in self.cameras.values():
-            signal.set(True)
+            signal.set()
             await task
             exit(0)
         
