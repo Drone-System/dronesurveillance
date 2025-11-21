@@ -57,7 +57,7 @@ class WebRTCProducer:
         self.q = q
         
         # await self.sio.connect(self.server_url)
-        address = f"{CONFIG.get("GRPC_REMOTE_IP")}:{CONFIG.get("GRPC_REMOTE_PORT")}"
+        address = f"{CONFIG.get('GRPC_REMOTE_IP')}:{CONFIG.get('GRPC_REMOTE_PORT')}"
         self.channel = channel = grpc.aio.insecure_channel(address)
 
         self.stub = ServerBaseStation_pb2_grpc.WebRtcStub(channel)

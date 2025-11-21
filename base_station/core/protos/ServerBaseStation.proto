@@ -1,0 +1,76 @@
+syntax = "proto3";
+
+service Cloud {
+    rpc Connect(ConnectToCloudRequest) returns (ConnectToCloudResponse);
+}
+
+message ConnectToCloudRequest {
+    string name = 1;
+}
+
+message ConnectToCloudResponse {
+    string id = 1;
+}
+
+
+
+service WebRtc {
+
+    rpc Connect (ConnectRequest) returns (ConnectResponse) {};
+    rpc Register (RegisterProducerRequest) returns (RegisterProducerResponse) {};
+    rpc Stream (StreamOffer) returns (StreamAnswer) {};
+    rpc IceCandidate (IceCandidateRequest) returns (IceCandidateResponse) {};
+    // rpc ViewerJoin (ViewerJoinedRequest) returns (ViewerJoinedResponse) {};
+}
+
+
+message RegisterProducerRequest {
+    string sid = 1;
+    string name = 2;
+}
+message RegisterProducerResponse {
+    string stream_id = 1;
+    string viewer_sid = 2;
+}
+
+// message Candidate {
+//     string candidate = 1;
+//     string sdpMid = 2;
+//     uint32 sdp_MLinIndex = 3;
+// }
+
+message IceCandidateRequest {
+    string candidate = 1;
+    string sdpMid = 2;
+    uint32 sdp_MLinIndex = 3;
+}
+message IceCandidateResponse {
+    string candidate = 1;
+    string sdpMid = 2;
+    uint32 sdp_MLinIndex = 3;
+} // Maybe this needs to respond with something
+
+message StreamDesc {
+    string type = 1;
+    string sdp = 2;
+}
+message StreamOffer {
+    string sid = 1;
+    string stream_id = 2;
+    string viewer_sid = 3;
+    StreamDesc offer = 4;
+}
+message StreamAnswer {
+    string stream_id = 1;
+    StreamDesc answer = 2;
+}
+
+message ConnectRequest {
+    string session_id = 1;
+}
+message ConnectResponse {}
+
+message ViewerJoinedRequest {
+    string viewer_sid = 1;
+}
+message ViewerJoinedResponse {}

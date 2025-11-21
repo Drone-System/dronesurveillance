@@ -1,15 +1,15 @@
-import psycopg2
+import psycopg
 from environment import CONFIG
 from camera.IpCamera import IpCamera
 
 class DatabaseManager:
     
     def __init__(self):
-        self.conn = psycopg2.connect(host = CONFIG.get('DB_HOST'),
+        self.conn = psycopg.connect(host = CONFIG.get('DB_HOST'),
                                         port = CONFIG.get('DB_PORT'),
                                         user = CONFIG.get('DB_USER'),
                                         password = CONFIG.get('DB_PASSWORD'),
-                                        database = CONFIG.get('DB_NAME'))
+                                        dbname = CONFIG.get('DB_NAME'))
         self.cursor = self.conn.cursor()
         pass
 
@@ -32,7 +32,7 @@ class DatabaseManager:
         if cam == 7:
             return IpCamera(2)
         else:
-            return IpCamera(0)
+            return IpCamera("udp://192.168.111.6:3000")
 
     def GetCameraNameById(self, cam_id: int):
         return "Some Name"
