@@ -39,6 +39,13 @@ class IDrone:
 
     def decode(self, string:str):
         keys = " ".split(string)
+        if keys[0] == ' ':
+            if not self.isFlying():
+                self.takeoff()
+            else:
+                self.land()
+
+
         move = True
         if (keys[0] == "stop"):
             move = False
@@ -56,8 +63,3 @@ class IDrone:
             self.rotateLeft(move)
         if k == 'e':
             self.rotateRight(move)
-        if k == ' ':
-            if not self.isFlying():
-                self.takeoff()
-            else:
-                self.land()
