@@ -21,6 +21,7 @@ class Movement:
 
 class DjiTelloVideoTrack(VideoStreamTrack):
     def __init__(self, drone):
+        super().__init__()
         self.drone = drone
         self.drone.streamon()
         self.frame_read = self.drone.get_frame_read()
