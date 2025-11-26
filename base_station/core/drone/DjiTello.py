@@ -26,8 +26,12 @@ class DjiTelloVideoTrack(VideoStreamTrack):
         self.drone.streamon()
         self.frame_read = self.drone.get_frame_read()
 
-    def recv(self):
-        return self.frame_read.frame
+    async def recv(self):
+        pts, time_base = await self.next_timestamp()
+        video_frame = self.frame_read.frame
+        video_frame.pts = pts
+        video_frame.time_base = time_base
+        return video_frame
 
 
 
