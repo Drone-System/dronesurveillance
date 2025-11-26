@@ -40,7 +40,7 @@ class DroneWebRTCProducer:
                 )
                 await pc.addIceCandidate(candidate)
             
-        self.pc.addTrack(self.source.video_track)
+        self.pc.addTrack(self.source.getVideoTrack())
         
         offer = await self.pc.createOffer()
         await self.pc.setLocalDescription(offer)
