@@ -39,7 +39,13 @@ class DroneWebRTCProducer:
                     sdpMLineIndex=response.sdpMLineIndex
                 )
                 await pc.addIceCandidate(candidate)
-            
+
+        chanell = self.pc.createDataChannel("commands")
+
+        @channel.on("message")
+        async def on_message(message):
+            print(f"Message is {message}")            
+        
         self.pc.addTrack(self.source.getVideoTrack())
         
         offer = await self.pc.createOffer()
@@ -66,7 +72,7 @@ class DroneWebRTCProducer:
         self.sid = response.stream_id
         response = False
         while not response:
-            response = await self.stub.Poll(ServerBaseStation_pb2.PollRequest(id=self.id))
+            response = await self.stub.Poll(ServerBaseStation_pb2.PollRequest(stream_id=self.sid))
             response = response.stream_needed
             await asyncio.sleep(0.5)
         print("some")
@@ -90,6 +96,7 @@ class DroneWebRTCProducer:
         # Keep running
         try:
             while not self.q.is_set():
+                self.source.sendCommand()
                 await asyncio.sleep(1)
         except KeyboardInterrupt:
             print("\nStopping producer...")
