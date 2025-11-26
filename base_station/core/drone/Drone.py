@@ -56,7 +56,7 @@ class IDrone:
             self.rotateLeft(move)
         if k == 'e':
             self.rotateRight(move)
-        if k == 'space':
+        if k == ' ':
             if not self.isFlying():
                 self.takeoff()
             else:
