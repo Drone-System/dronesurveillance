@@ -49,6 +49,7 @@ class DjiTelloDrone(IDrone):
         self.drone = Tello()
         self.movement = Movement(0,0,0,0)
         self.video_track = VideoStreamTrack
+        self.isFlying = False
 
     
     def connect(self):
