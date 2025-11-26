@@ -44,6 +44,7 @@ class DroneWebRTCProducer:
 
         @channel.on("message")
         async def on_message(message):
+            print("message", message)
             self.source.decode(message)
 
         
