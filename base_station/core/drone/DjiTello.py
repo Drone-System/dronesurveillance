@@ -88,6 +88,8 @@ class DjiTelloDrone(IDrone):
             self.isFlying = False
             self.drone.land()
     
+    def isFlying(self):
+        return self.isFlying
 
     def sendCommand(self):
         if self.isFlying:
