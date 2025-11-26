@@ -40,11 +40,12 @@ class DroneWebRTCProducer:
                 )
                 await pc.addIceCandidate(candidate)
 
-        chanell = self.pc.createDataChannel("commands")
+        channel = self.pc.createDataChannel("commands")
 
         @channel.on("message")
         async def on_message(message):
-            print(f"Message is {message}")            
+            self.source.decode(message)
+
         
         self.pc.addTrack(self.source.getVideoTrack())
         
