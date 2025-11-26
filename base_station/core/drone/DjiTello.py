@@ -1,6 +1,7 @@
 from drone.Drone import IDrone
 from djitellopy import Tello
 from aiortc import VideoStreamTrack
+from av import VideoFrame
 
 class Movement:
     def __init__(self, back_front, left_rigth, down_up, yaw):
@@ -28,7 +29,8 @@ class DjiTelloVideoTrack(VideoStreamTrack):
 
     async def recv(self):
         pts, time_base = await self.next_timestamp()
-        video_frame = self.frame_read.frame
+        frame = self.frame_read.frame
+        video_frame = VideoFrame.from_ndarray(frame, format="rgb24")
         video_frame.pts = pts
         video_frame.time_base = time_base
         return video_frame
