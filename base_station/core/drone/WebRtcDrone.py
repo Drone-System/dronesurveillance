@@ -9,18 +9,19 @@ import uuid
 import asyncio
 from camera.IpCamera import IpCamera # REMOVE LATER WHEN CHANGING DEFAULT SOURCE
 
-class WebRTCProducer:
+class DroneWebRTCProducer:
     def __init__(self, basestation_id, source, stream_name="Unnamed Camera"):
         self.basestation_id = basestation_id
         self.stream_name = stream_name
         self.source = source
         self.stream_id = None
-        self.pc = RTCPeerConnection()  # Only one peer connection per camera
+        # self.pc = RTCPeerConnection()  # Only one peer connection per camera
         
     async def __on_start_stream(self):
         print("Stream Starting")
         self.pc = RTCPeerConnection()
-        
+        self.source = self.source()
+        self.source.connect()
         # Handle ICE candidates
         @self.pc.on("icecandidate")
         async def on_icecandidate(candidate):
@@ -38,8 +39,8 @@ class WebRTCProducer:
                     sdpMLineIndex=response.sdpMLineIndex
                 )
                 await pc.addIceCandidate(candidate)
-                
-        self.pc.addTrack(self.source)
+            
+        self.pc.addTrack(self.source.video_track)
         
         offer = await self.pc.createOffer()
         await self.pc.setLocalDescription(offer)
@@ -54,21 +55,25 @@ class WebRTCProducer:
             await self.channel.close()
     
     async def start(self, q):
-        print(f"Starting producer: {self.stream_name}")
+        print(f"Starting drone producer: {self.stream_name}")
         self.q = q
         
         # await self.sio.connect(self.server_url)
         address = f"{CONFIG.get('GRPC_REMOTE_IP')}:{CONFIG.get('GRPC_REMOTE_PORT')}"
         self.channel = channel = grpc.aio.insecure_channel(address)
-        print("some")
-        self.stub = ServerBaseStation_pb2_grpc.WebRtcStub(channel)
-        print("some")
+        self.stub = ServerBaseStation_pb2_grpc.DroneWebRtcStub(channel)
         response = await self.stub.Connect(ServerBaseStation_pb2.ConnectRequest())
+        self.sid = response.stream_id
+        response = False
+        while not response:
+            response = await self.stub.Poll(ServerBaseStation_pb2.PollRequest(id=self.id))
+            response = response.stream_needed
+            await asyncio.sleep(0.5)
         print("some")
         # generate session id
-        self.sid = response.stream_id
+        # self.sid = str(uuid.uuid4())
         self.name = f"{self.basestation_id}/{self.sid}"
-        response = await self.stub.Register(ServerBaseStation_pb2.RegisterProducerRequest(sid=self.sid, name=self.name))
+        # response = await self.stub.Register(ServerBaseStation_pb2.RegisterProducerRequest(sid=self.sid, name=self.name))
         print("some")
         await self.__on_start_stream()
         response = await self.stub.Stream(

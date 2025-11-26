@@ -5,6 +5,8 @@ from aiortc import RTCPeerConnection, RTCSessionDescription, RTCIceCandidate
 from aiortc.contrib.media import MediaRecorder, MediaRelay
 from av import VideoFrame
 
+import uuid
+
 import argparse
 import threading
 from time import sleep
@@ -20,13 +22,16 @@ class VideoReceiver:
         self.track = None
         self.running = True
 
-    async def handle_track(self, track, name="Frame"):
+    async def handle_track(self, track, name="Frame", signal: asyncio.Event = None):
         print("Inside handle track")
         self.track = track
         frame_count = 0
-        while self.running:
+        count = 0
+        self.signal = signal
+        while not self.signal.is_set():
+            await asyncio.sleep(0.001)
             try:
-                print("Waiting for frame...")
+                # print("Waiting for frame...")
                 frame = await asyncio.wait_for(track.recv(), timeout=5.0)
                 frame_count += 1
                 print(f"Received frame {frame_count}")
@@ -39,7 +44,7 @@ class VideoReceiver:
                 else:
                     print(f"Unexpected frame type: {type(frame)}")
                     continue
-              
+                
                  # Add timestamp to the frame
                 current_time = datetime.now()
                 new_time = current_time # - timedelta( seconds=55)
@@ -52,15 +57,21 @@ class VideoReceiver:
                 # Exit on 'q' key press
                 if cv2.waitKey(1) & 0xFF == ord('q'):
                     break
+                count = 0
             except asyncio.TimeoutError:
                 print("Timeout waiting for frame, continuing...")
             except Exception as e:
-                print(f"Error in handle_track: {str(e)}")
+                # print(f"Error in handle_track: {str(e)}")
                 if "Connection" in str(e):
                     break
+                count += 1
+                # print(count)
+                # if count >= 2000: # break after 2000
+                #     break
         print("Exiting handle_track")
 
     def exit(self):
+        print("Setted running false")
         self.running = False
 
 class WebRTCReceiverServer(ServerBaseStation_pb2_grpc.WebRtcServicer):
@@ -76,8 +87,7 @@ class WebRTCReceiverServer(ServerBaseStation_pb2_grpc.WebRtcServicer):
         request: ServerBaseStation_pb2.ConnectRequest,
         context: grpc.aio.ServicerContext,
     ) -> ServerBaseStation_pb2.ConnectResponse:
-        # print("Connection established:", request.session_id)
-        return ServerBaseStation_pb2.ConnectResponse()
+        return ServerBaseStation_pb2.ConnectResponse(stream_id=uuid.uuid4())
 
     async def Register(
         self,
@@ -116,35 +126,37 @@ class WebRTCReceiverServer(ServerBaseStation_pb2_grpc.WebRtcServicer):
             
             if track.kind == "video":
 
-                # Start display thread
-                # if request.sid not in self.video_receivers:
-                #     self.video_receivers[request.sid] = {}
+
                 mrec = MediaRecorder(f"{track.id}.mp4", options={"framerate": "30", "video_size": "640x480"})
                 relay = MediaRelay()
 
                 mrec.addTrack(relay.subscribe(track))
                 video_receiver= VideoReceiver() 
-                asyncio.ensure_future(video_receiver.handle_track(relay.subscribe(track), request.stream_id))
+                signal = asyncio.Event()
+                asyncio.ensure_future(video_receiver.handle_track(relay.subscribe(track), request.stream_id, signal))
                 await mrec.start()
 
                 try:
-                    self.video_receivers[request.stream_id] = video_receiver
-                    pass
+                    self.video_receivers[request.stream_id] = (video_receiver, signal)
+
                 except Exception as e:
                     print(f"Track ended for {stream_name}: {e}")
-        
-        # Handle ICE candidates
-        @pc.on("icecandidate")
-        async def on_icecandidate(candidate):
-            if candidate:
-                await self.sio.emit('ice_candidate', {
-                    'from_sid': 'server',
-                    'candidate': {
-                        'candidate': candidate.candidate,
-                        'sdpMid': candidate.sdpMid,
-                        'sdpMLineIndex': candidate.sdpMLineIndex
-                    }
-                }, room=sid)
+        @pc.on("connectionstatechange")
+        async def on_connection_changed():
+            print("state: ", pc.connectionState)
+
+        # # Handle ICE candidates
+        # @pc.on("icecandidate")
+        # async def on_icecandidate(candidate):
+        #     if candidate:
+        #         await self.sio.emit('ice_candidate', {
+        #             'from_sid': 'server',
+        #             'candidate': {
+        #                 'candidate': candidate.candidate,
+        #                 'sdpMid': candidate.sdpMid,
+        #                 'sdpMLineIndex': candidate.sdpMLineIndex
+        #             }
+        #         }, room=sid)
         
         # Set remote description
         await pc.setRemoteDescription(
@@ -172,17 +184,17 @@ class WebRTCReceiverServer(ServerBaseStation_pb2_grpc.WebRtcServicer):
     ) -> ServerBaseStation_pb2.DisconnectResponse:
         print("Received disc")
         print(self.video_receivers)
-        input()
         try:
-            self.video_receivers[request.stream_id].exit()
+            self.video_receivers[request.stream_id][1].set()
             self.video_receivers.pop(request.stream_id) 
         except:
             print("what the flip")
-        self.peer_connections[request.stream_id].close()
+        if self.peer_connections[request.stream_id].connectionState != "closed":
+            await self.peer_connections[request.stream_id].close()
         return ServerBaseStation_pb2.DisconnectResponse()
 
 
-async def main():
+async def main(signal):
 
     server = grpc.aio.server()
     ServerBaseStation_pb2_grpc.add_WebRtcServicer_to_server(WebRTCReceiverServer(), server)
@@ -191,11 +203,19 @@ async def main():
     print("Starting server on ", listen_addr)
     await server.start()
 
-    await server.wait_for_termination()
+    while not signal.is_set():
+        await asyncio.sleep(1)
+
+    print("\nServer stopped here")
+    await server.stop()
+    # cv2.destroyAllWindows()
+    # await server.wait_for_termination()
 
 if __name__ == '__main__':
     try:
-        asyncio.run(main())
+        signal = asyncio.Event()
+        asyncio.run(main(signal))
     except KeyboardInterrupt:
         print("\nServer stopped")
+        signal.set()
         cv2.destroyAllWindows()
