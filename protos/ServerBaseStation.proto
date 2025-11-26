@@ -1,11 +1,13 @@
 syntax = "proto3";
 
 service DroneWebRtc {
+    rpc Connect (ConnectRequest) returns (ConnectResponse);
     rpc Poll (PollRequest) returns (PollResponse); 
-    rpc OfferStream (StreamOffer) returns (StreamAnswer);
-    // rpc Answer (StreamAnswer) returns (ConnectResponse);
+    rpc Stream (StreamOffer) returns (StreamAnswer);
 }
-message PollRequest {}
+message PollRequest {
+    string stream_id = 1;
+}
 message PollResponse {
     bool stream_needed = 1;
 }
@@ -79,9 +81,10 @@ message StreamAnswer {
     StreamDesc answer = 2;
 }
 
-message ConnectRequest {
+message ConnectRequest {}
+message ConnectResponse {
+    string stream_id = 1;
 }
-message ConnectResponse {}
 
 message DisconnectRequest {
     string stream_id = 1;
