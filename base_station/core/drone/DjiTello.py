@@ -40,6 +40,7 @@ class DjiTelloDrone(IDrone):
         # self.video_port = video_port
         self.drone = Tello(host=ip)
         self.movement = Movement(0,0,0,0)
+        self.video_track = VideoStreamTrack
 
     
     def connect(self):
@@ -86,3 +87,6 @@ class DjiTelloDrone(IDrone):
                                     self.movement.back_front, 
                                     self.movement.down_up, 
                                     self.movement.yaw)
+
+    def getVideoTrack(self):
+        return self.video_track
