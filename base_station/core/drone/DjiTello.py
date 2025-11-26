@@ -38,6 +38,7 @@ class DjiTelloDrone(IDrone):
         # self.ip = ip
         # self.port = port
         # self.video_port = video_port
+        super().__init__()
         self.drone = Tello(host=ip)
         self.movement = Movement(0,0,0,0)
         self.video_track = VideoStreamTrack

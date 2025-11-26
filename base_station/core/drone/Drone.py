@@ -33,3 +33,31 @@ class IDrone:
 
     def getVideoTrack(self):
         raise Exception("Not implemented")
+    
+    def isFlying(self):
+        raise Exception("Not implemented")
+
+    def decode(self, string:str):
+        keys = " ".split(string)
+        move = True
+        if (keys[0] == "stop"):
+            move = False
+            keys.pop(0)
+        k = keys[0]
+        if k == 'w':
+            self.moveFront(move)
+        if k == 'a':
+            self.moveLeft(move)
+        if k == 's':
+            self.moveBack(move)
+        if k == 'd':
+            self.moveRight(move)
+        if k == 'q':
+            self.rotateLeft(move)
+        if k == 'e':
+            self.rotateRight(move)
+        if k == 'space':
+            if not self.isFlying():
+                self.takeoff()
+            else:
+                self.land()
