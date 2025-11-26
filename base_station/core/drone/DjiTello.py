@@ -49,7 +49,7 @@ class DjiTelloDrone(IDrone):
         self.drone = Tello()
         self.movement = Movement(0,0,0,0)
         self.video_track = VideoStreamTrack
-        self.isFlying = False
+        self.flying = False
 
     
     def connect(self):
@@ -80,20 +80,20 @@ class DjiTelloDrone(IDrone):
         self.movement.setYaw(UNIT if move else 0)
 
     def takeoff(self):
-        if not self.isFlying:
-            self.isFlying = True
+        if not self.flying:
+            self.flying = True
             self.drone.takeoff()
     
     def land(self):
-        if self.isFlying:
-            self.isFlying = False
+        if self.flying:
+            self.flying = False
             self.drone.land()
     
     def isFlying(self):
-        return self.isFlying
+        return self.flying
 
     def sendCommand(self):
-        if self.isFlying:
+        if self.flying:
             self.drone.send_rc_control(self.movement.left_rigth, 
                                     self.movement.back_front, 
                                     self.movement.down_up, 
