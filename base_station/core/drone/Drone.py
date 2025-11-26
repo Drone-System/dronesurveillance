@@ -38,7 +38,7 @@ class IDrone:
         raise Exception("Not implemented")
 
     def decode(self, string:str):
-        keys = " ".split(string)
+        keys = string.split(" ")
         if keys[0] == ' ':
             if not self.isFlying():
                 self.takeoff()
