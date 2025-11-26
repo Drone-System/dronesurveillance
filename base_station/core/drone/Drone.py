@@ -30,3 +30,6 @@ class IDrone:
 
     def sendCommand(self):
         raise Exception("Not implemented")
+
+    def getVideoTrack(self):
+        raise Exception("Not implemented")
