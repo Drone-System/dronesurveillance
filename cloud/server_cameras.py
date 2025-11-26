@@ -87,7 +87,7 @@ class WebRTCReceiverServer(ServerBaseStation_pb2_grpc.WebRtcServicer):
         request: ServerBaseStation_pb2.ConnectRequest,
         context: grpc.aio.ServicerContext,
     ) -> ServerBaseStation_pb2.ConnectResponse:
-        return ServerBaseStation_pb2.ConnectResponse(stream_id=uuid.uuid4())
+        return ServerBaseStation_pb2.ConnectResponse(stream_id=str(uuid.uuid4()))
 
     async def Register(
         self,
