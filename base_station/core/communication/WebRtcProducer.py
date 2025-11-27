@@ -1,4 +1,4 @@
-from aiortc import RTCPeerConnection, RTCSessionDescription, VideoStreamTrack
+from aiortc import RTCPeerConnection, RTCSessionDescription, VideoStreamTrack, RTCConfiguration, RTCIceServer
 from aiortc.contrib.media import MediaPlayer
 from environment import CONFIG
 from multiprocessing import Queue
@@ -15,11 +15,12 @@ class WebRTCProducer:
         self.stream_name = stream_name
         self.source = source
         self.stream_id = None
-        self.pc = RTCPeerConnection()  # Only one peer connection per camera
+        self.pc = None
         
     async def __on_start_stream(self):
         print("Stream Starting")
-        self.pc = RTCPeerConnection()
+        ice_server = RTCIceServer(urls='stun:stun.l.google.com:19302')
+        self.pc = RTCPeerConnection(RTCConfiguration(iceServers=[ice_server]))
         
         # Handle ICE candidates
         @self.pc.on("icecandidate")
