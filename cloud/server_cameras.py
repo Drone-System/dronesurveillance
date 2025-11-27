@@ -33,41 +33,37 @@ class VideoReceiver:
             try:
                 # print("Waiting for frame...")
                 frame = await asyncio.wait_for(track.recv(), timeout=5.0)
-                frame_count += 1
-                print(f"Received frame {frame_count}")
+                # frame_count += 1
+                # print(f"Received frame {frame_count}")
                 
-                if isinstance(frame, VideoFrame):
-                    print(f"Frame type: VideoFrame, pts: {frame.pts}, time_base: {frame.time_base}")
-                    frame = frame.to_ndarray(format="bgr24")
-                elif isinstance(frame, np.ndarray):
-                    print(f"Frame type: numpy array")
-                else:
-                    print(f"Unexpected frame type: {type(frame)}")
-                    continue
+                # if isinstance(frame, VideoFrame):
+                #     print(f"Frame type: VideoFrame, pts: {frame.pts}, time_base: {frame.time_base}")
+                #     frame = frame.to_ndarray(format="bgr24")
+                # elif isinstance(frame, np.ndarray):
+                #     print(f"Frame type: numpy array")
+                # else:
+                #     print(f"Unexpected frame type: {type(frame)}")
+                #     continue
                 
-                 # Add timestamp to the frame
-                current_time = datetime.now()
-                new_time = current_time # - timedelta( seconds=55)
-                timestamp = new_time.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
-                cv2.putText(frame, timestamp, (10, frame.shape[0] - 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
-                cv2.imwrite(f"imgs/received_frame_{frame_count}.jpg", frame)
+                #  # Add timestamp to the frame
+                # current_time = datetime.now()
+                # new_time = current_time # - timedelta( seconds=55)
+                # timestamp = new_time.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+                # cv2.putText(frame, timestamp, (10, frame.shape[0] - 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
+                # cv2.imwrite(f"imgs/received_frame_{frame_count}.jpg", frame)
                 print(f"Saved frame {frame_count} to file")
-                cv2.imshow(name, frame)
+                # cv2.imshow(name, frame)
     
                 # Exit on 'q' key press
-                if cv2.waitKey(1) & 0xFF == ord('q'):
-                    break
-                count = 0
+                # if cv2.waitKey(1) & 0xFF == ord('q'):
+                #     break
+                # count = 0
             except asyncio.TimeoutError:
                 print("Timeout waiting for frame, continuing...")
             except Exception as e:
                 # print(f"Error in handle_track: {str(e)}")
                 if "Connection" in str(e):
                     break
-                count += 1
-                # print(count)
-                # if count >= 2000: # break after 2000
-                #     break
         print("Exiting handle_track")
 
     def exit(self):
@@ -146,17 +142,11 @@ class WebRTCReceiverServer(ServerBaseStation_pb2_grpc.WebRtcServicer):
             print("state: ", pc.connectionState)
 
         # # Handle ICE candidates
-        # @pc.on("icecandidate")
-        # async def on_icecandidate(candidate):
-        #     if candidate:
-        #         await self.sio.emit('ice_candidate', {
-        #             'from_sid': 'server',
-        #             'candidate': {
-        #                 'candidate': candidate.candidate,
-        #                 'sdpMid': candidate.sdpMid,
-        #                 'sdpMLineIndex': candidate.sdpMLineIndex
-        #             }
-        #         }, room=sid)
+        @pc.on("icecandidate")
+        async def on_icecandidate(candidate):
+            print("received ice")
+            if candidate:
+                print("received", candidate)
         
         # Set remote description
         await pc.setRemoteDescription(
