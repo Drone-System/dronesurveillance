@@ -1,0 +1,12 @@
+# ignore python env
+venv*
+__pycache__
+
+# ignore file with configurations
+.env
+
+# ignore grpc generated files
+*pb2*
+
+# ignore vscode files
+.vscode
