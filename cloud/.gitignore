@@ -1,8 +1,0 @@
-venv
-__pycache__
-ServerBaseStation_pb2_grpc.py
-ServerBaseStation_pb2.py
-ServerBaseStation_pb2.pyi
-drone-interface-server/ServerBaseStation_pb2_grpc.py
-drone-interface-server/ServerBaseStation_pb2.py
-drone-interface-server/ServerBaseStation_pb2.pyi
