@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Device</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>Select Device Type</h1>
+    <a href="{{ url_for('add_camera') }}"><button>Add Camera</button></a>
+    <a href="{{ url_for('add_drone') }}"><button>Add Drone</button></a>
+</body>
+</html>
