@@ -1,6 +1,7 @@
+from google.protobuf.internal import containers as _containers
 from google.protobuf import descriptor as _descriptor
 from google.protobuf import message as _message
-from collections.abc import Mapping as _Mapping
+from collections.abc import Iterable as _Iterable, Mapping as _Mapping
 from typing import ClassVar as _ClassVar, Optional as _Optional, Union as _Union
 
 DESCRIPTOR: _descriptor.FileDescriptor
@@ -96,8 +97,12 @@ class StreamAnswer(_message.Message):
     def __init__(self, stream_id: _Optional[str] = ..., answer: _Optional[_Union[StreamDesc, _Mapping]] = ...) -> None: ...
 
 class ConnectRequest(_message.Message):
-    __slots__ = ()
-    def __init__(self) -> None: ...
+    __slots__ = ("baseStation_id", "name")
+    BASESTATION_ID_FIELD_NUMBER: _ClassVar[int]
+    NAME_FIELD_NUMBER: _ClassVar[int]
+    baseStation_id: str
+    name: str
+    def __init__(self, baseStation_id: _Optional[str] = ..., name: _Optional[str] = ...) -> None: ...
 
 class ConnectResponse(_message.Message):
     __slots__ = ("stream_id",)
@@ -112,5 +117,37 @@ class DisconnectRequest(_message.Message):
     def __init__(self, stream_id: _Optional[str] = ...) -> None: ...
 
 class DisconnectResponse(_message.Message):
+    __slots__ = ()
+    def __init__(self) -> None: ...
+
+class DroneStreamRequest(_message.Message):
+    __slots__ = ("baseStation_id", "drone_id")
+    BASESTATION_ID_FIELD_NUMBER: _ClassVar[int]
+    DRONE_ID_FIELD_NUMBER: _ClassVar[int]
+    baseStation_id: str
+    drone_id: str
+    def __init__(self, baseStation_id: _Optional[str] = ..., drone_id: _Optional[str] = ...) -> None: ...
+
+class AvailableDroneRequest(_message.Message):
+    __slots__ = ("baseStation_id",)
+    BASESTATION_ID_FIELD_NUMBER: _ClassVar[int]
+    baseStation_id: str
+    def __init__(self, baseStation_id: _Optional[str] = ...) -> None: ...
+
+class AvailableDronesResponse(_message.Message):
+    __slots__ = ("info",)
+    INFO_FIELD_NUMBER: _ClassVar[int]
+    info: _containers.RepeatedCompositeFieldContainer[DroneInfo]
+    def __init__(self, info: _Optional[_Iterable[_Union[DroneInfo, _Mapping]]] = ...) -> None: ...
+
+class DroneInfo(_message.Message):
+    __slots__ = ("id", "name")
+    ID_FIELD_NUMBER: _ClassVar[int]
+    NAME_FIELD_NUMBER: _ClassVar[int]
+    id: str
+    name: str
+    def __init__(self, id: _Optional[str] = ..., name: _Optional[str] = ...) -> None: ...
+
+class Ack(_message.Message):
     __slots__ = ()
     def __init__(self) -> None: ...
