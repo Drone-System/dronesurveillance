@@ -1,14 +1,26 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, redirect, request, url_for, flash, session, make_response, jsonify
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 import pandas as pd
 import psycopg
 import time
 import os
 import ssl
+import grpc
+import ServerBaseStation_pb2, ServerBaseStation_pb2_grpc
+import uuid
+import asyncio
+from threading import Thread
+
 
 # -------------------- Database --------------------
 # Retry connection logic for Docker startup
 max_retries = 5
 retry_delay = 2
+
+channel = grpc.aio.insecure_channel('localhost:50051')
+stub = ServerBaseStation_pb2_grpc.WebserverDroneCommuncationDetailsStub(channel)
+
+communication = ServerBaseStation_pb2_grpc.DroneWebRtcServicer
 
 for attempt in range(max_retries):
     try:
@@ -33,7 +45,7 @@ for attempt in range(max_retries):
 # -------------------- Flask setup --------------------
 webserver = Flask(__name__)
 webserver.secret_key = "your_secret_key_change_this_in_production"
-webserver.config['SESSION_COOKIE_SECURE'] = False
+webserver.config['SESSION_COOKIE_SECURE'] = True
 webserver.config['SESSION_COOKIE_HTTPONLY'] = True
 webserver.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 
@@ -211,6 +223,36 @@ def unauthorized(e):
     """Handle unauthorized access"""
     return redirect(url_for("login"))
 
+@webserver.route('/')
+def main():
+    drones = stub.RequestAvailableDrones()
+    return render_template('droneview.html', channel=communication)
+
+@webserver.route('/request', methods = ['POST'])
+async def somethingelse():
+    data = request.get_json()
+    id = data['id']
+    if id not in communication:
+        print(id)
+        return jsonify({})
+    channel = communication[id]
+    channel.requested = True
+    print(id, 'request true')
+    while not channel.offer:
+        await asyncio.sleep(0.5)
+    print('read offer')
+    offer = jsonify(channel.offer)
+    channel.offer = {}
+    return offer
+
+@webserver.route('/answer', methods = ['POST'])
+def answer():
+    data = request.get_json()
+    id = data['stream_id']
+    communication[id].answer = data
+    response = {}
+    # print(data)
+    return jsonify(response)
 # -------------------- Run --------------------
 if __name__ == "__main__":
     context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
