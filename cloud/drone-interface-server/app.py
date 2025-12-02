@@ -9,11 +9,15 @@ from threading import Thread
 
 app = Flask(__name__)
 
-communication = {}
+address = f"localhost:50051"
+
+channel =  grpc.aio.insecure_channel()
+stub = ServerBaseStation_pb2_grpc.WebserverDroneCommuncationDetailsStub(channel)
 
 @app.route('/')
 def main():
-    return render_template('index.html', channel=communication)
+    drones = stub.RequestAvailableDrones()
+    return render_template('droneview.html', channel=communication)
 
 @app.route('/request', methods = ['POST'])
 async def somethingelse():
@@ -41,72 +45,14 @@ def answer():
     # print(data)
     return jsonify(response)
 
-class Channel:
-    def __init__(self):
-        self.requested:bool=False
-        self.offer = {}
-        self.answer = {}
 
-class DroneWebRtc(ServerBaseStation_pb2_grpc.DroneWebRtcServicer):
-    def __init__(self, communication):
-        self.communication = communication
-
-    async def Connect(
-        self,
-        request: ServerBaseStation_pb2.ConnectRequest,
-        context: grpc.aio.ServicerContext,
-    ) -> ServerBaseStation_pb2.ConnectResponse:
-        stream_id=str(uuid.uuid4())
-        self.communication.update({stream_id:Channel()})
-        print('connect')
-        return ServerBaseStation_pb2.ConnectResponse(stream_id=stream_id)
-    
-    async def Stream(
-        self,
-        request: ServerBaseStation_pb2.StreamOffer,
-        context: grpc.aio.ServicerContext,
-    ) -> ServerBaseStation_pb2.StreamAnswer:
-        offer = {'stream_id':request.stream_id,'offer':{'type':request.offer.type, 'sdp':request.offer.sdp}}
-        comm = self.communication[request.stream_id]
-        comm.offer = offer
-        while not comm.answer:
-            await asyncio.sleep(0.5)
-
-        print(comm.answer)
-        answer = ServerBaseStation_pb2.StreamAnswer(stream_id=comm.answer['stream_id'], 
-                                      answer=ServerBaseStation_pb2.StreamDesc(
-                                          type=comm.answer['answer']['type'],
-                                          sdp=comm.answer['answer']['sdp']),
-                                      )
-        comm.answer = {}
-        return answer
-
-    async def Poll(
-        self,
-        request: ServerBaseStation_pb2.PollRequest,
-        context: grpc.aio.ServicerContext,
-    ) -> ServerBaseStation_pb2.PollResponse:
-        id = request.stream_id
-        return ServerBaseStation_pb2.PollResponse(stream_needed=self.communication[id].requested)
-
-async def main():
-    server = grpc.aio.server()
-    ServerBaseStation_pb2_grpc.add_DroneWebRtcServicer_to_server(DroneWebRtc(communication), server)
-    listen_addr = "[::]:50051"
-    server.add_insecure_port(listen_addr)
-    print("Starting server on ", listen_addr)
-    await server.start()
-    context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-    context.load_cert_chain('cert.pem', 'key.pem')
-    #asyncio.ensure_future(app.run('0.0.0.0', port=443, ssl_context=context, debug=False, use_reloader=False))
-    #app.run('0.0.0.0', port=443, ssl_context=context, debug=True)
-    await server.wait_for_termination()
 
 if __name__ == '__main__':
+    # identifier = stub.Connect(ServerBaseStation_pb2.ConnectToCloudRequest(name='name'))
+
     context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
     context.load_cert_chain('cert.pem', 'key.pem')
 
     thread = Thread(target=app.run,
     args=('0.0.0.0',), kwargs=dict(port=443, ssl_context=context, debug=False, use_reloader=False))
     thread.start()
-    asyncio.run(main())

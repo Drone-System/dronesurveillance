@@ -497,3 +497,161 @@ class WebRtc(object):
             timeout,
             metadata,
             _registered_method=True)
+
+
+class WebserverDroneCommuncationDetailsStub(object):
+    """Missing associated documentation comment in .proto file."""
+
+    def __init__(self, channel):
+        """Constructor.
+
+        Args:
+            channel: A grpc.Channel.
+        """
+        self.RequestDroneStream = channel.unary_unary(
+                '/WebserverDroneCommuncationDetails/RequestDroneStream',
+                request_serializer=ServerBaseStation__pb2.DroneStreamRequest.SerializeToString,
+                response_deserializer=ServerBaseStation__pb2.StreamOffer.FromString,
+                _registered_method=True)
+        self.RequestAvailableDrones = channel.unary_unary(
+                '/WebserverDroneCommuncationDetails/RequestAvailableDrones',
+                request_serializer=ServerBaseStation__pb2.AvailableDroneRequest.SerializeToString,
+                response_deserializer=ServerBaseStation__pb2.AvailableDronesResponse.FromString,
+                _registered_method=True)
+        self.Answer = channel.unary_unary(
+                '/WebserverDroneCommuncationDetails/Answer',
+                request_serializer=ServerBaseStation__pb2.StreamAnswer.SerializeToString,
+                response_deserializer=ServerBaseStation__pb2.Ack.FromString,
+                _registered_method=True)
+
+
+class WebserverDroneCommuncationDetailsServicer(object):
+    """Missing associated documentation comment in .proto file."""
+
+    def RequestDroneStream(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def RequestAvailableDrones(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def Answer(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+
+def add_WebserverDroneCommuncationDetailsServicer_to_server(servicer, server):
+    rpc_method_handlers = {
+            'RequestDroneStream': grpc.unary_unary_rpc_method_handler(
+                    servicer.RequestDroneStream,
+                    request_deserializer=ServerBaseStation__pb2.DroneStreamRequest.FromString,
+                    response_serializer=ServerBaseStation__pb2.StreamOffer.SerializeToString,
+            ),
+            'RequestAvailableDrones': grpc.unary_unary_rpc_method_handler(
+                    servicer.RequestAvailableDrones,
+                    request_deserializer=ServerBaseStation__pb2.AvailableDroneRequest.FromString,
+                    response_serializer=ServerBaseStation__pb2.AvailableDronesResponse.SerializeToString,
+            ),
+            'Answer': grpc.unary_unary_rpc_method_handler(
+                    servicer.Answer,
+                    request_deserializer=ServerBaseStation__pb2.StreamAnswer.FromString,
+                    response_serializer=ServerBaseStation__pb2.Ack.SerializeToString,
+            ),
+    }
+    generic_handler = grpc.method_handlers_generic_handler(
+            'WebserverDroneCommuncationDetails', rpc_method_handlers)
+    server.add_generic_rpc_handlers((generic_handler,))
+    server.add_registered_method_handlers('WebserverDroneCommuncationDetails', rpc_method_handlers)
+
+
+ # This class is part of an EXPERIMENTAL API.
+class WebserverDroneCommuncationDetails(object):
+    """Missing associated documentation comment in .proto file."""
+
+    @staticmethod
+    def RequestDroneStream(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/WebserverDroneCommuncationDetails/RequestDroneStream',
+            ServerBaseStation__pb2.DroneStreamRequest.SerializeToString,
+            ServerBaseStation__pb2.StreamOffer.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def RequestAvailableDrones(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/WebserverDroneCommuncationDetails/RequestAvailableDrones',
+            ServerBaseStation__pb2.AvailableDroneRequest.SerializeToString,
+            ServerBaseStation__pb2.AvailableDronesResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def Answer(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/WebserverDroneCommuncationDetails/Answer',
+            ServerBaseStation__pb2.StreamAnswer.SerializeToString,
+            ServerBaseStation__pb2.Ack.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)

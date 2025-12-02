@@ -24,7 +24,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x17ServerBaseStation.proto\" \n\x0bPollRequest\x12\x11\n\tstream_id\x18\x01 \x01(\t\"%\n\x0cPollResponse\x12\x15\n\rstream_needed\x18\x01 \x01(\x08\"!\n\rStreamRequest\x12\x10\n\x08\x64rone_id\x18\x01 \x01(\t\"%\n\x15\x43onnectToCloudRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\"$\n\x16\x43onnectToCloudResponse\x12\n\n\x02id\x18\x01 \x01(\t\"4\n\x17RegisterProducerRequest\x12\x0b\n\x03sid\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\"A\n\x18RegisterProducerResponse\x12\x11\n\tstream_id\x18\x01 \x01(\t\x12\x12\n\nviewer_sid\x18\x02 \x01(\t\"O\n\x13IceCandidateRequest\x12\x11\n\tcandidate\x18\x01 \x01(\t\x12\x0e\n\x06sdpMid\x18\x02 \x01(\t\x12\x15\n\rsdp_MLinIndex\x18\x03 \x01(\r\"P\n\x14IceCandidateResponse\x12\x11\n\tcandidate\x18\x01 \x01(\t\x12\x0e\n\x06sdpMid\x18\x02 \x01(\t\x12\x15\n\rsdp_MLinIndex\x18\x03 \x01(\r\"\'\n\nStreamDesc\x12\x0c\n\x04type\x18\x01 \x01(\t\x12\x0b\n\x03sdp\x18\x02 \x01(\t\"<\n\x0bStreamOffer\x12\x11\n\tstream_id\x18\x01 \x01(\t\x12\x1a\n\x05offer\x18\x02 \x01(\x0b\x32\x0b.StreamDesc\">\n\x0cStreamAnswer\x12\x11\n\tstream_id\x18\x01 \x01(\t\x12\x1b\n\x06\x61nswer\x18\x02 \x01(\x0b\x32\x0b.StreamDesc\"\x10\n\x0e\x43onnectRequest\"$\n\x0f\x43onnectResponse\x12\x11\n\tstream_id\x18\x01 \x01(\t\"&\n\x11\x44isconnectRequest\x12\x11\n\tstream_id\x18\x01 \x01(\t\"\x14\n\x12\x44isconnectResponse2\x87\x01\n\x0b\x44roneWebRtc\x12,\n\x07\x43onnect\x12\x0f.ConnectRequest\x1a\x10.ConnectResponse\x12#\n\x04Poll\x12\x0c.PollRequest\x1a\r.PollResponse\x12%\n\x06Stream\x12\x0c.StreamOffer\x1a\r.StreamAnswer2C\n\x05\x43loud\x12:\n\x07\x43onnect\x12\x16.ConnectToCloudRequest\x1a\x17.ConnectToCloudResponse2\x9c\x02\n\x06WebRtc\x12.\n\x07\x43onnect\x12\x0f.ConnectRequest\x1a\x10.ConnectResponse\"\x00\x12\x41\n\x08Register\x12\x18.RegisterProducerRequest\x1a\x19.RegisterProducerResponse\"\x00\x12\'\n\x06Stream\x12\x0c.StreamOffer\x1a\r.StreamAnswer\"\x00\x12=\n\x0cIceCandidate\x12\x14.IceCandidateRequest\x1a\x15.IceCandidateResponse\"\x00\x12\x37\n\nDisconnect\x12\x12.DisconnectRequest\x1a\x13.DisconnectResponse\"\x00\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x17ServerBaseStation.proto\" \n\x0bPollRequest\x12\x11\n\tstream_id\x18\x01 \x01(\t\"%\n\x0cPollResponse\x12\x15\n\rstream_needed\x18\x01 \x01(\x08\"!\n\rStreamRequest\x12\x10\n\x08\x64rone_id\x18\x01 \x01(\t\"%\n\x15\x43onnectToCloudRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\"$\n\x16\x43onnectToCloudResponse\x12\n\n\x02id\x18\x01 \x01(\t\"4\n\x17RegisterProducerRequest\x12\x0b\n\x03sid\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\"A\n\x18RegisterProducerResponse\x12\x11\n\tstream_id\x18\x01 \x01(\t\x12\x12\n\nviewer_sid\x18\x02 \x01(\t\"O\n\x13IceCandidateRequest\x12\x11\n\tcandidate\x18\x01 \x01(\t\x12\x0e\n\x06sdpMid\x18\x02 \x01(\t\x12\x15\n\rsdp_MLinIndex\x18\x03 \x01(\r\"P\n\x14IceCandidateResponse\x12\x11\n\tcandidate\x18\x01 \x01(\t\x12\x0e\n\x06sdpMid\x18\x02 \x01(\t\x12\x15\n\rsdp_MLinIndex\x18\x03 \x01(\r\"\'\n\nStreamDesc\x12\x0c\n\x04type\x18\x01 \x01(\t\x12\x0b\n\x03sdp\x18\x02 \x01(\t\"<\n\x0bStreamOffer\x12\x11\n\tstream_id\x18\x01 \x01(\t\x12\x1a\n\x05offer\x18\x02 \x01(\x0b\x32\x0b.StreamDesc\">\n\x0cStreamAnswer\x12\x11\n\tstream_id\x18\x01 \x01(\t\x12\x1b\n\x06\x61nswer\x18\x02 \x01(\x0b\x32\x0b.StreamDesc\"6\n\x0e\x43onnectRequest\x12\x16\n\x0e\x62\x61seStation_id\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\"$\n\x0f\x43onnectResponse\x12\x11\n\tstream_id\x18\x01 \x01(\t\"&\n\x11\x44isconnectRequest\x12\x11\n\tstream_id\x18\x01 \x01(\t\"\x14\n\x12\x44isconnectResponse\">\n\x12\x44roneStreamRequest\x12\x16\n\x0e\x62\x61seStation_id\x18\x01 \x01(\t\x12\x10\n\x08\x64rone_id\x18\x02 \x01(\t\"/\n\x15\x41vailableDroneRequest\x12\x16\n\x0e\x62\x61seStation_id\x18\x01 \x01(\t\"3\n\x17\x41vailableDronesResponse\x12\x18\n\x04info\x18\x01 \x03(\x0b\x32\n.DroneInfo\"%\n\tDroneInfo\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\"\x05\n\x03\x41\x63k2\x87\x01\n\x0b\x44roneWebRtc\x12,\n\x07\x43onnect\x12\x0f.ConnectRequest\x1a\x10.ConnectResponse\x12#\n\x04Poll\x12\x0c.PollRequest\x1a\r.PollResponse\x12%\n\x06Stream\x12\x0c.StreamOffer\x1a\r.StreamAnswer2C\n\x05\x43loud\x12:\n\x07\x43onnect\x12\x16.ConnectToCloudRequest\x1a\x17.ConnectToCloudResponse2\x9c\x02\n\x06WebRtc\x12.\n\x07\x43onnect\x12\x0f.ConnectRequest\x1a\x10.ConnectResponse\"\x00\x12\x41\n\x08Register\x12\x18.RegisterProducerRequest\x1a\x19.RegisterProducerResponse\"\x00\x12\'\n\x06Stream\x12\x0c.StreamOffer\x1a\r.StreamAnswer\"\x00\x12=\n\x0cIceCandidate\x12\x14.IceCandidateRequest\x1a\x15.IceCandidateResponse\"\x00\x12\x37\n\nDisconnect\x12\x12.DisconnectRequest\x1a\x13.DisconnectResponse\"\x00\x32\xcd\x01\n!WebserverDroneCommuncationDetails\x12\x39\n\x12RequestDroneStream\x12\x13.DroneStreamRequest\x1a\x0c.StreamOffer\"\x00\x12L\n\x16RequestAvailableDrones\x12\x16.AvailableDroneRequest\x1a\x18.AvailableDronesResponse\"\x00\x12\x1f\n\x06\x41nswer\x12\r.StreamAnswer\x1a\x04.Ack\"\x00\x62\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -56,17 +56,29 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_STREAMANSWER']._serialized_start=599
   _globals['_STREAMANSWER']._serialized_end=661
   _globals['_CONNECTREQUEST']._serialized_start=663
-  _globals['_CONNECTREQUEST']._serialized_end=679
-  _globals['_CONNECTRESPONSE']._serialized_start=681
-  _globals['_CONNECTRESPONSE']._serialized_end=717
-  _globals['_DISCONNECTREQUEST']._serialized_start=719
-  _globals['_DISCONNECTREQUEST']._serialized_end=757
-  _globals['_DISCONNECTRESPONSE']._serialized_start=759
-  _globals['_DISCONNECTRESPONSE']._serialized_end=779
-  _globals['_DRONEWEBRTC']._serialized_start=782
-  _globals['_DRONEWEBRTC']._serialized_end=917
-  _globals['_CLOUD']._serialized_start=919
-  _globals['_CLOUD']._serialized_end=986
-  _globals['_WEBRTC']._serialized_start=989
-  _globals['_WEBRTC']._serialized_end=1273
+  _globals['_CONNECTREQUEST']._serialized_end=717
+  _globals['_CONNECTRESPONSE']._serialized_start=719
+  _globals['_CONNECTRESPONSE']._serialized_end=755
+  _globals['_DISCONNECTREQUEST']._serialized_start=757
+  _globals['_DISCONNECTREQUEST']._serialized_end=795
+  _globals['_DISCONNECTRESPONSE']._serialized_start=797
+  _globals['_DISCONNECTRESPONSE']._serialized_end=817
+  _globals['_DRONESTREAMREQUEST']._serialized_start=819
+  _globals['_DRONESTREAMREQUEST']._serialized_end=881
+  _globals['_AVAILABLEDRONEREQUEST']._serialized_start=883
+  _globals['_AVAILABLEDRONEREQUEST']._serialized_end=930
+  _globals['_AVAILABLEDRONESRESPONSE']._serialized_start=932
+  _globals['_AVAILABLEDRONESRESPONSE']._serialized_end=983
+  _globals['_DRONEINFO']._serialized_start=985
+  _globals['_DRONEINFO']._serialized_end=1022
+  _globals['_ACK']._serialized_start=1024
+  _globals['_ACK']._serialized_end=1029
+  _globals['_DRONEWEBRTC']._serialized_start=1032
+  _globals['_DRONEWEBRTC']._serialized_end=1167
+  _globals['_CLOUD']._serialized_start=1169
+  _globals['_CLOUD']._serialized_end=1236
+  _globals['_WEBRTC']._serialized_start=1239
+  _globals['_WEBRTC']._serialized_end=1523
+  _globals['_WEBSERVERDRONECOMMUNCATIONDETAILS']._serialized_start=1526
+  _globals['_WEBSERVERDRONECOMMUNCATIONDETAILS']._serialized_end=1731
 # @@protoc_insertion_point(module_scope)
