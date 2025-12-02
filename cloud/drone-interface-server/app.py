@@ -14,6 +14,8 @@ address = f"localhost:50051"
 channel =  grpc.aio.insecure_channel()
 stub = ServerBaseStation_pb2_grpc.WebserverDroneCommuncationDetailsStub(channel)
 
+communication = ServerBaseStation_pb2_grpc.DroneWebRtcServicer
+
 @app.route('/')
 def main():
     drones = stub.RequestAvailableDrones()
