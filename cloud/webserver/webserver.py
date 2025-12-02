@@ -199,8 +199,9 @@ def logout():
 def home():
     """Protected home page"""
     try:
-        data = pd.read_sql("select name from basestations where id =ANY(select basestation_id from basestations_to_groups where group_id =ANY(select group_id from users_to_groups where user_id = %s));", conn, params=[current_user.id],)
+        data = pd.read_sql("select id, name from basestations where id =ANY(select basestation_id from basestations_to_groups where group_id =ANY(select group_id from users_to_groups where user_id = %s));", conn, params=[current_user.id],)
         items = data.to_dict("records")
+        print(items)
         return render_template("index.html", items=items, username=current_user.username)
     except Exception as e:
         print(f"Error loading home page: {e}")
