@@ -17,10 +17,10 @@ from threading import Thread
 max_retries = 5
 retry_delay = 2
 
-channel = grpc.aio.insecure_channel('localhost:50051')
-stub = ServerBaseStation_pb2_grpc.WebserverDroneCommuncationDetailsStub(channel)
+#channel = grpc.aio.insecure_channel('localhost:50051')
+#stub = ServerBaseStation_pb2_grpc.WebserverDroneCommuncationDetailsStub(channel)
 
-communication = ServerBaseStation_pb2_grpc.DroneWebRtcServicer
+#communication = ServerBaseStation_pb2_grpc.DroneWebRtcServicer
 
 for attempt in range(max_retries):
     try:
@@ -224,36 +224,36 @@ def unauthorized(e):
     """Handle unauthorized access"""
     return redirect(url_for("login"))
 
-@webserver.route('/')
-def main():
-    drones = stub.RequestAvailableDrones()
-    return render_template('droneview.html', channel=communication)
+# #@webserver.route('/')
+# #def main():
+#     drones = stub.RequestAvailableDrones()
+#     return render_template('droneview.html', channel=communication)
 
-@webserver.route('/request', methods = ['POST'])
-async def somethingelse():
-    data = request.get_json()
-    id = data['id']
-    if id not in communication:
-        print(id)
-        return jsonify({})
-    channel = communication[id]
-    channel.requested = True
-    print(id, 'request true')
-    while not channel.offer:
-        await asyncio.sleep(0.5)
-    print('read offer')
-    offer = jsonify(channel.offer)
-    channel.offer = {}
-    return offer
+# #@webserver.route('/request', methods = ['POST'])
+# #async def somethingelse():
+#     data = request.get_json()
+#     id = data['id']
+#     if id not in communication:
+#         print(id)
+#         return jsonify({})
+#     channel = communication[id]
+#     channel.requested = True
+#     print(id, 'request true')
+#     while not channel.offer:
+#         await asyncio.sleep(0.5)
+#     print('read offer')
+#     offer = jsonify(channel.offer)
+#     channel.offer = {}
+#     return offer
 
-@webserver.route('/answer', methods = ['POST'])
-def answer():
-    data = request.get_json()
-    id = data['stream_id']
-    communication[id].answer = data
-    response = {}
-    # print(data)
-    return jsonify(response)
+# #@webserver.route('/answer', methods = ['POST'])
+# #def answer():
+#     data = request.get_json()
+#     id = data['stream_id']
+#     communication[id].answer = data
+#     response = {}
+#     # print(data)
+#     return jsonify(response)
 # -------------------- Run --------------------
 if __name__ == "__main__":
     context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
