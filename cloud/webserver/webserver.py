@@ -1,9 +1,10 @@
-from flask import Flask, render_template, redirect, request, url_for, flash, session
+from flask import Flask, render_template, redirect, request, url_for, flash, session, make_response
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 import pandas as pd
 import psycopg
 import time
 import os
+import ssl
 
 # -------------------- Database --------------------
 # Retry connection logic for Docker startup
@@ -72,6 +73,11 @@ def load_user(user_id):
     
     return None
 
+
+@webserver.before_request
+def debug_request():
+    print(f">>> {request.method} {request.path} | Authenticated={current_user.is_authenticated}")
+
 # -------------------- Routes --------------------
 @webserver.route("/")
 def index():
@@ -82,22 +88,32 @@ def index():
 
 @webserver.route("/login", methods=["GET", "POST"])
 def login():
+
+    if current_user.is_authenticated:
+        return redirect(url_for("home"))
+    
     """Login and registration page"""
     # Clear any corrupted session data
     if not current_user.is_authenticated:
         session.clear()
-    
-    if current_user.is_authenticated:
-        return redirect(url_for("home"))
     
     if request.method == "POST":
         action = request.form.get("action", "")
         
         # REGISTRATION
         if action == "register":
+
+            with conn.cursor() as cur:
+                cur.execute("select username from users;")
+                rows = cur.fetchall()
+                usernames = [r[0] for r in rows]
+
             username = request.form.get("create_username", "")
             password = request.form.get("create_password", "")
             
+            if username in usernames:
+                return render_template("login.html", error="Username already in use"), 400
+
             if not username or not password:
                 return render_template("login.html", error="Username and password are required"), 400
             
@@ -165,19 +181,26 @@ def login():
     return render_template("login.html")
 
 @webserver.route("/logout")
-@login_required
 def logout():
-    """Logout and redirect to login"""
-    logout_user()
-    session.clear()
-    return redirect(url_for("login"))
+    print(f"[LOGOUT] Before logout: authenticated={current_user.is_authenticated}")
+    
+    logout_user()           # clear Flask-Login’s session
+    session.clear()         # clear Flask session
+    
+    # Explicitly remove the remember-me cookie
+    resp = make_response(redirect(url_for("login")))
+    resp.delete_cookie("remember_token")
+    
+    print(f"[LOGOUT] After logout: authenticated={current_user.is_authenticated}")
+    return resp
+
 
 @webserver.route("/home")
 @login_required
 def home():
     """Protected home page"""
     try:
-        data = pd.read_sql("SELECT name, ip FROM basestations", conn)
+        data = pd.read_sql("select name from basestations where id =ANY(select basestation_id from basestations_to_groups where group_id =ANY(select group_id from users_to_groups where user_id = %s));", conn, params=[current_user.id],)
         items = data.to_dict("records")
         return render_template("index.html", items=items, username=current_user.username)
     except Exception as e:
@@ -189,10 +212,12 @@ def home():
 # -------------------- Error handlers --------------------
 @webserver.errorhandler(404)
 def not_found(e):
-    """Handle 404 errors"""
-    if current_user.is_authenticated:
+    # Only redirect authenticated users away from invalid pages
+    if current_user.is_authenticated and request.endpoint not in ["logout", "login"]:
         return redirect(url_for("home"))
     return redirect(url_for("login"))
+
+
 
 @webserver.errorhandler(401)
 def unauthorized(e):
@@ -201,4 +226,6 @@ def unauthorized(e):
 
 # -------------------- Run --------------------
 if __name__ == "__main__":
-    webserver.run(host="0.0.0.0", port=5000, debug=True)
+    context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+    context.load_cert_chain('cert.pem', 'key.pem')
+    webserver.run('0.0.0.0', port=5000, ssl_context=context, debug=True)
