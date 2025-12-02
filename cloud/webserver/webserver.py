@@ -221,6 +221,15 @@ def home():
         session.clear()
         return redirect(url_for("login"))
 
+
+@webserver.route("/basestation")
+def basestation():
+    item_id = request.args.get("id")   # <-- gets the ?id=...
+
+    if not item_id:
+        return "Missing id", 400
+
+    return render_template("droneview.html", basestation=item_id)
 # -------------------- Error handlers --------------------
 @webserver.errorhandler(404)
 def not_found(e):
