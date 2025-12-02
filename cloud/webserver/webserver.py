@@ -17,10 +17,10 @@ from threading import Thread
 max_retries = 5
 retry_delay = 2
 
-#channel = grpc.aio.insecure_channel('localhost:50051')
-#stub = ServerBaseStation_pb2_grpc.WebserverDroneCommuncationDetailsStub(channel)
+channel = grpc.aio.insecure_channel('localhost:50051')
+stub = ServerBaseStation_pb2_grpc.WebserverDroneCommuncationDetailsStub(channel)
 
-#communication = ServerBaseStation_pb2_grpc.DroneWebRtcServicer
+communication = ServerBaseStation_pb2_grpc.DroneWebRtcServicer
 
 for attempt in range(max_retries):
     try:
@@ -224,7 +224,7 @@ def home():
 
 @webserver.route("/basestation")
 def basestation():
-    item_id = request.args.get("id")   # <-- gets the ?id=...
+    item_id = request.args.get("id")
 
     if not item_id:
         return "Missing id", 400
