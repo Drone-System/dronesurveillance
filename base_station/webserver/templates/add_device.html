@@ -2,22 +2,40 @@
 <html>
 <head>
     <title>Add {{ device_type }}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <h1>Add {{ device_type }}</h1>
-    <form method="POST">
-        <label for="ip">IP:</label>
-        <input type="text" name="ip" id="ip" placeholder="Enter IP address" required>
-        <br><br>
 
-        <label for="protocol">Video Protocol:</label>
+    <form method="POST">
+        <!-- IP ADDRESS -->
+        <label for="ip">IP:</label>
+        <input type="text" name="ip" id="ip" required><br><br>
+
+        <!-- PORT -->
+        <label for="port">Port:</label>
+        <input type="number" name="port" id="port" value="80"><br><br>
+
+        <!-- USERNAME -->
+        <label for="username">Username:</label>
+        <input type="text" name="username" id="username"><br><br>
+
+        <!-- PASSWORD -->
+        <label for="password">Password:</label>
+        <input type="password" name="password" id="password"><br><br>
+
+        <!-- PROTOCOL -->
+        <label for="protocol">Protocol:</label>
         <select name="protocol" id="protocol" required>
             {% for protocol in protocols %}
                 <option value="{{ protocol }}">{{ protocol }}</option>
             {% endfor %}
         </select>
         <br><br>
+
+        {% if device_type == "Camera" %}
+            <label for="camera_type">Camera Type:</label>
+            <input type="text" name="camera_type" id="camera_type"><br><br>
+        {% endif %}
 
         <button type="submit">Add {{ device_type }}</button>
     </form>
