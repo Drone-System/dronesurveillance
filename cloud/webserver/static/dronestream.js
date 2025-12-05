@@ -57,6 +57,9 @@ async function watchStream(streamId) {
 }
 
 // init()
+const drone_id = document.getElementById('videos')
+watchStream(drone_id.dataset.droneId)
+
 
 document.addEventListener('keypress', function(event){
     if (!event.repeat){

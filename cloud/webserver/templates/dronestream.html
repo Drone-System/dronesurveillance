@@ -8,12 +8,11 @@
     <link rel='stylesheet' type='text/css' media='screen' href="{{url_for('static', filename='main.css')}}">
 </head>
 <body>
-    <div>
-        {% for drone in drones:%}
-            <li>
-                <a href="/basestation/{{basestation_id}}/drones/{{drone.id}}">{{ drone.name }}</a>
-            </li>
-        {% endfor %}
+
+    <div id="videos" data-drone-id = {{drone_id}}>
+        <video class="video-player" id="drone-stream" autoplay playsinline></video>
     </div>
+
 </body>
+<script src="{{url_for('static', filename='dronestream.js')}}"></script>
 </html>
