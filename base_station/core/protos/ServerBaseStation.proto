@@ -1,0 +1,92 @@
+syntax = "proto3";
+
+service DroneWebRtc {
+    rpc Connect (ConnectRequest) returns (ConnectResponse);
+    rpc Poll (PollRequest) returns (PollResponse); 
+    rpc Stream (StreamOffer) returns (StreamAnswer);
+}
+message PollRequest {
+    string stream_id = 1;
+}
+message PollResponse {
+    bool stream_needed = 1;
+}
+
+message StreamRequest {
+    string drone_id = 1;
+}
+
+
+
+service Cloud {
+    rpc Connect(ConnectToCloudRequest) returns (ConnectToCloudResponse);
+}
+
+message ConnectToCloudRequest {
+    string name = 1;
+}
+
+message ConnectToCloudResponse {
+    string id = 1;
+}
+
+
+
+service WebRtc {
+
+    rpc Connect (ConnectRequest) returns (ConnectResponse) {};
+    rpc Register (RegisterProducerRequest) returns (RegisterProducerResponse) {};
+    rpc Stream (StreamOffer) returns (StreamAnswer) {};
+    rpc IceCandidate (IceCandidateRequest) returns (IceCandidateResponse) {};
+    rpc Disconnect (DisconnectRequest) returns (DisconnectResponse) {};
+}
+
+
+message RegisterProducerRequest {
+    string stream_id = 1;
+    string name = 2;
+}
+message RegisterProducerResponse {
+    string stream_id = 1;
+    string viewer_sid = 2;
+}
+
+// message Candidate {
+//     string candidate = 1;
+//     string sdpMid = 2;
+//     uint32 sdp_MLinIndex = 3;
+// }
+
+message IceCandidateRequest {
+    string candidate = 1;
+    string sdpMid = 2;
+    uint32 sdp_MLinIndex = 3;
+}
+message IceCandidateResponse {
+    string candidate = 1;
+    string sdpMid = 2;
+    uint32 sdp_MLinIndex = 3;
+} // Maybe this needs to respond with something
+
+message StreamDesc {
+    string type = 1;
+    string sdp = 2;
+}
+message StreamOffer {
+    string stream_id = 1;
+    StreamDesc offer = 2;
+}
+message StreamAnswer {
+    string stream_id = 1;
+    StreamDesc answer = 2;
+}
+
+message ConnectRequest {}
+message ConnectResponse {
+    string stream_id = 1;
+}
+
+message DisconnectRequest {
+    string stream_id = 1;
+}
+message DisconnectResponse {}

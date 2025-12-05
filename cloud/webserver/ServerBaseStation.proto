@@ -1,0 +1,121 @@
+syntax = "proto3";
+
+service DroneWebRtc {
+    rpc Connect (ConnectRequest) returns (ConnectResponse);
+    rpc Poll (PollRequest) returns (PollResponse); 
+    rpc Stream (StreamOffer) returns (StreamAnswer);
+}
+message PollRequest {
+    string basestation_id = 1;
+    string stream_id = 2;
+}
+message PollResponse {
+    bool stream_needed = 1;
+}
+
+message StreamRequest {
+    string drone_id = 1;
+}
+
+service Cloud {
+    rpc Connect(ConnectToCloudRequest) returns (ConnectToCloudResponse);
+}
+
+message ConnectToCloudRequest {
+    string name = 1;
+}
+
+message ConnectToCloudResponse {
+    string id = 1;
+}
+
+service WebRtc {
+
+    rpc Connect (ConnectRequest) returns (ConnectResponse) {};
+    rpc Register (RegisterProducerRequest) returns (RegisterProducerResponse) {};
+    rpc Stream (StreamOffer) returns (StreamAnswer) {};
+    rpc IceCandidate (IceCandidateRequest) returns (IceCandidateResponse) {};
+    rpc Disconnect (DisconnectRequest) returns (DisconnectResponse) {};
+}
+
+
+message RegisterProducerRequest {
+    string sid = 1;
+    string name = 2;
+}
+message RegisterProducerResponse {
+    string stream_id = 1;
+    string viewer_sid = 2;
+}
+
+// message Candidate {
+//     string candidate = 1;
+//     string sdpMid = 2;
+//     uint32 sdp_MLinIndex = 3;
+// }
+
+message IceCandidateRequest {
+    string candidate = 1;
+    string sdpMid = 2;
+    uint32 sdp_MLinIndex = 3;
+}
+message IceCandidateResponse {
+    string candidate = 1;
+    string sdpMid = 2;
+    uint32 sdp_MLinIndex = 3;
+} // Maybe this needs to respond with something
+
+message StreamDesc {
+    string type = 1;
+    string sdp = 2;
+}
+message StreamOffer {
+    string basestation_id = 1;
+    string stream_id = 2;
+    StreamDesc offer = 3;
+}
+message StreamAnswer {
+    string basestation_id = 1;
+    string stream_id = 2;
+    StreamDesc answer = 3;
+}
+
+message ConnectRequest {
+    string basestation_id = 1;
+    string name = 2;
+}
+
+message ConnectResponse {
+    string stream_id = 1;
+}
+
+message DisconnectRequest {
+    string stream_id = 1;
+}
+message DisconnectResponse {}
+
+service WebserverDroneCommuncationDetails{
+    rpc RequestAvailableDrones (AvailableDroneRequest) returns (AvailableDronesResponse) {};
+    rpc RequestDroneStream (DroneStreamRequest) returns (StreamOffer) {};
+    rpc Answer (StreamAnswer) returns (Ack) {};
+}
+
+message  DroneStreamRequest{
+    string basestation_id = 1;
+    string drone_id = 2;
+}
+
+message AvailableDroneRequest {
+    string basestation_id = 1;
+}
+
+message AvailableDronesResponse {
+    repeated DroneInfo info = 1;
+}
+
+message DroneInfo {
+    string id = 1;
+    string name = 2;
+}
+
+message Ack {}
