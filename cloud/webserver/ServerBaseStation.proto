@@ -6,7 +6,8 @@ service DroneWebRtc {
     rpc Stream (StreamOffer) returns (StreamAnswer);
 }
 message PollRequest {
-    string stream_id = 1;
+    string basestation_id = 1;
+    string stream_id = 2;
 }
 message PollResponse {
     bool stream_needed = 1;
@@ -69,16 +70,18 @@ message StreamDesc {
     string sdp = 2;
 }
 message StreamOffer {
-    string stream_id = 1;
-    StreamDesc offer = 2;
+    string basestation_id = 1;
+    string stream_id = 2;
+    StreamDesc offer = 3;
 }
 message StreamAnswer {
-    string stream_id = 1;
-    StreamDesc answer = 2;
+    string basestation_id = 1;
+    string stream_id = 2;
+    StreamDesc answer = 3;
 }
 
 message ConnectRequest {
-    string baseStation_id = 1;
+    string basestation_id = 1;
     string name = 2;
 }
 
@@ -98,7 +101,8 @@ service WebserverDroneCommuncationDetails{
 }
 
 message  DroneStreamRequest{
-    string drone_id = 1;
+    string basestation_id = 1;
+    string drone_id = 2;
 }
 
 message AvailableDroneRequest {
