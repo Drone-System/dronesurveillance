@@ -43,7 +43,7 @@ service WebRtc {
 
 
 message RegisterProducerRequest {
-    string sid = 1;
+    string stream_id = 1;
     string name = 2;
 }
 message RegisterProducerResponse {
