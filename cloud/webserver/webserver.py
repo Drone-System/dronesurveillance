@@ -82,6 +82,11 @@ def load_user(user_id):
     
     return None
 
+
+@webserver.before_request
+def debug_request():
+    print(f">>> {request.method} {request.path} | Authenticated={current_user.is_authenticated}")
+
 # -------------------- Routes --------------------
 @webserver.route("/")
 def index():
@@ -185,7 +190,6 @@ def login():
     return render_template("login.html")
 
 @webserver.route("/logout")
-@login_required
 def logout():
     print(f"[LOGOUT] Before logout: authenticated={current_user.is_authenticated}", flush=True)
     

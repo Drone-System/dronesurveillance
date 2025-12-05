@@ -56,22 +56,6 @@ CREATE OR REPLACE FUNCTION public.verify_user(in_username text, in_password text
      VALUES (                                                                                                          
          in_username,                                                                                                  
          salt,                                                                                                         
-         encode(digest(in_password || salt::text, 'sha256'), 'hex'),                                                   
-         in_basestations                                                                                               
-     );                                                                                                                
- END;                                                                                                                  
- $procedure$;
-
-  CREATE OR REPLACE PROCEDURE public.create_basestation(IN in_name text, IN in_password text)
-  LANGUAGE plpgsql                                                                                                     
- AS $procedure$                                                                                                        
- DECLARE                                               
-     salt UUID := gen_random_uuid();                                                                                   
- BEGIN                                                                                                                 
-     INSERT INTO basestations (name, password_salt, password)                                               
-     VALUES (                                                                                                          
-         in_name,                                                                                                  
-         salt,                                                                                                         
          encode(digest(in_password || salt::text, 'sha256'), 'hex')                                                                                                                                                 
      );                                                                                                                
  END;                                                                                                                  
