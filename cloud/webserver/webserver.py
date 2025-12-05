@@ -219,6 +219,26 @@ def home():
         session.clear()
         return redirect(url_for("login"))
 
+@webserver.route("/basestation/add", methods=['GET', 'POST'])
+@login_required
+def add_basestation():
+    # check if user is allowed to request drones from that base station
+    # data = pd.read_sql("select id, name from basestations where id =ANY(select basestation_id from basestations_to_groups where group_id =ANY(select group_id from users_to_groups where user_id = %s));", conn, params=[current_user.id],)
+
+    # basestations = pd.read_sql("select id, name from basestations where id = %s::integer", conn, params=[basestation_id],)
+    # basestation_info = basestations.to_dict("records")[0]
+    if request.method == 'POST':
+        id = request.form.get("bsid")
+
+        # check if basestation id exists
+        # check if id has already an owner
+        # if not assign owner to current user
+        # else Say it cant assign
+
+        return redirect(url_for("home"))
+
+    return render_template("addbasestationview.html")
+
 @webserver.route("/basestation/<int:basestation_id>")
 def basestation(basestation_id):
     print("\n\n\n\n", flush=True)
@@ -234,7 +254,7 @@ def basestation(basestation_id):
     print(basestation_info, flush=True)
     print("\n\n\n\n", flush=True)
 
-    return render_template("basestationview.html", basestation=basestation_info)
+    return render_template("basestationview.html", basestation=basestation_info, admin=False)
 
 @webserver.route("/basestation/<int:basestation_id>/drones")
 async def droneview(basestation_id):
@@ -257,6 +277,16 @@ async def dronestream(basestation_id, drone_id):
     
     return render_template("dronestream.html", basestation_id=str(basestation_id), drone_id = str(drone_id))
 
+@webserver.route("/basestation/<int:basestation_id>/adduser", methods=['GET', 'POST'])
+def basestation_adduser(basestation_id):
+    if request.method == 'POST':
+        user = request.form.get("user")
+        # add user to basestation
+
+        # maybe add success feedback
+        return redirect(url_for("basestation", basestation_id=basestation_id))
+
+    return render_template("basestationadduserview.html")
 
 @webserver.route("/basestation/<int:basestation_id>/cameras")
 def basestation_cameras(basestation_id):  

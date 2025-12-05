@@ -13,3 +13,16 @@ video access.
 model deployment and tuning. 3. Cloud backend for alert processing and encrypted
 storage. 4. Dashboard development for authorized user interaction. 5. Final testing in
 simulated security incident scenarios.
+
+
+#
+
+## TODOS
+
+* [ ] Adjust database to not have groups
+* [ ] COnnect cloud webserver to proper database and ajust permissions
+* [ ] Develop Proxy server with grpc server
+* [ ] Develop Drone manager
+* [ ] Integrate basestation webserver with core and database
+* [ ] Integrate drone manager with camera manager
+* [ ] CELEBRATE
