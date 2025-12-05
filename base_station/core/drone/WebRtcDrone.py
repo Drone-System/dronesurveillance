@@ -70,11 +70,11 @@ class DroneWebRTCProducer:
         address = f"{CONFIG.get('GRPC_REMOTE_IP')}:{CONFIG.get('GRPC_REMOTE_PORT')}"
         self.channel = channel = grpc.aio.insecure_channel(address)
         self.stub = ServerBaseStation_pb2_grpc.DroneWebRtcStub(channel)
-        response = await self.stub.Connect(ServerBaseStation_pb2.ConnectRequest())
+        response = await self.stub.Connect(ServerBaseStation_pb2.ConnectRequest(basestation_id=str(self.basestation_id), name= "test"))
         self.sid = response.stream_id
         response = False
         while not response:
-            response = await self.stub.Poll(ServerBaseStation_pb2.PollRequest(stream_id=self.sid))
+            response = await self.stub.Poll(ServerBaseStation_pb2.PollRequest(basestation_id=str(self.basestation_id), stream_id=self.sid))
             response = response.stream_needed
             await asyncio.sleep(0.5)
         print("some")
@@ -86,6 +86,7 @@ class DroneWebRTCProducer:
         await self.__on_start_stream()
         response = await self.stub.Stream(
             ServerBaseStation_pb2.StreamOffer(
+                basestation_id=str(self.basestation_id),
                 stream_id=self.sid, 
                 offer=ServerBaseStation_pb2.StreamDesc(
                     type=self.pc.localDescription.type,

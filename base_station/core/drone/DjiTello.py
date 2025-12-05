@@ -82,8 +82,8 @@ class DjiTelloDrone(IDrone):
 
     def takeoff(self):
         if not self.flying:
-            self.flying = True
             self.drone.takeoff()
+            self.flying = True
     
     def land(self):
         if self.flying:
