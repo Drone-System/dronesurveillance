@@ -48,7 +48,7 @@ class WebRTCProducer:
 
     async def __cleanup(self):
         print("Closing pc")
-        await self.stub.Disconnect(ServerBaseStation_pb2.DisconnectRequest(stream_id=self.sid))
+        await self.stub.Disconnect(ServerBaseStation_pb2.DisconnectRequest(stream_id=self.stream_id))
         # await self.pc.close()
         print("closing Channel")
         if hasattr(self, 'channel'):
@@ -67,14 +67,14 @@ class WebRTCProducer:
         response = await self.stub.Connect(ServerBaseStation_pb2.ConnectRequest())
         print("some")
         # generate session id
-        self.sid = response.stream_id
-        self.name = f"{self.basestation_id}/{self.sid}"
-        response = await self.stub.Register(ServerBaseStation_pb2.RegisterProducerRequest(sid=self.sid, name=self.name))
+        self.stream_id = f"{self.basestation_id}/{response.stream_id}"
+        self.name = self.stream_name
+        response = await self.stub.Register(ServerBaseStation_pb2.RegisterProducerRequest(stream_id=self.stream_id, name=self.name))
         print("some")
         await self.__on_start_stream()
         response = await self.stub.Stream(
             ServerBaseStation_pb2.StreamOffer(
-                stream_id=self.sid, 
+                stream_id=self.stream_id, 
                 offer=ServerBaseStation_pb2.StreamDesc(
                     type=self.pc.localDescription.type,
                     sdp=self.pc.localDescription.sdp)))
