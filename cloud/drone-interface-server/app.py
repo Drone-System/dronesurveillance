@@ -48,6 +48,36 @@ def answer():
     return jsonify(response)
 
 
+@app.route('/')
+def main():
+    drones = stub.RequestAvailableDrones()
+    return render_template('droneview.html', channel=communication)
+
+@app.route('/request', methods = ['POST'])
+async def somethingelse():
+    data = request.get_json()
+    id = data['id']
+    if id not in communication:
+        print(id)
+        return jsonify({})
+    channel = communication[id]
+    channel.requested = True
+    print(id, 'request true')
+    while not channel.offer:
+        await asyncio.sleep(0.5)
+    print('read offer')
+    offer = jsonify(channel.offer)
+    channel.offer = {}
+    return offer
+
+@app.route('/answer', methods = ['POST'])
+def answer():
+    data = request.get_json()
+    id = data['stream_id']
+    communication[id].answer = data
+    response = {}
+    # print(data)
+    return jsonify(response)
 
 if __name__ == '__main__':
     # identifier = stub.Connect(ServerBaseStation_pb2.ConnectToCloudRequest(name='name'))
