@@ -1,22 +1,22 @@
 let peerConnection = new RTCPeerConnection()
 let datachannel
 
-async function getData(id) {
+async function getData(drone_id, basestation_id) {
 const url = "https://localhost/request";
 const response = await fetch(url, {
   method: "POST",
   headers: {
     "Content-Type": "application/json"
   },
-  body: JSON.stringify({'id': id})
+  body: JSON.stringify({'drone_id': drone_id, 'basestation_id': basestation_id})
 });
 //console.log(response.json())
 return response.json()
 }
 
-async function watchStream(streamId) {
+async function watchStream(streamId, basestation_id) {
 
-    data = await getData(streamId)
+    const data = await getData(streamId, basestation_id)
     console.log('data')
     console.log(data)
     const pc = new RTCPeerConnection()
@@ -37,19 +37,23 @@ async function watchStream(streamId) {
     await pc.setLocalDescription(answer);
 
     const url = "https://localhost/answer";
-    console.log(JSON.stringify({'stream_id': streamId, "answer": {
-        "type": pc.localDescription.type,
-        "sdp": pc.localDescription.sdp
+    console.log(JSON.stringify({'basestation_id': basestation_id, 
+                                'stream_id': streamId, 
+                                "answer": {
+                                    "type": pc.localDescription.type,
+                                    "sdp": pc.localDescription.sdp
     }}))
     const response = await fetch(url, {
     method: "POST",
     headers: {
         "Content-Type": "application/json"
     },
-    body: JSON.stringify({'stream_id': streamId, "answer": {
-        "type": pc.localDescription.type,
-        "sdp": pc.localDescription.sdp
-    }})
+    body: JSON.stringify({'basestation_id': basestation_id, 
+                            'stream_id': streamId, 
+                            "answer": {
+                                "type": pc.localDescription.type,
+                                "sdp": pc.localDescription.sdp
+                        }})
 
     });
     console.log(response.json())
@@ -57,8 +61,12 @@ async function watchStream(streamId) {
 }
 
 // init()
-const drone_id = document.getElementById('videos')
-watchStream(drone_id.dataset.droneId)
+const data_config = document.getElementById('videos')
+const drone_id = data_config.dataset.droneId
+const basestation_id = data_config.dataset.basestationId
+
+console.log(basestation_id)
+watchStream(drone_id, basestation_id)
 
 
 document.addEventListener('keypress', function(event){

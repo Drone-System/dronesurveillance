@@ -250,7 +250,7 @@ async def droneview(basestation_id):
     else:
         return "NO DRONES AVAILABLE"
 
-@webserver.route("/basestation/<int:basestation_id>/drones/<int:drone_id>")
+@webserver.route("/basestation/<int:basestation_id>/drones/<drone_id>")
 async def dronestream(basestation_id, drone_id):  
     # check if user is allowed to request drones from that base station
     # data = pd.read_sql("select id, name from basestations where id = ")
@@ -263,22 +263,20 @@ def basestation_cameras(basestation_id):
 
     return render_template("cameras.html")
 
-# -------------------- Error handlers --------------------
-@webserver.errorhandler(404)
-def not_found(e):
-    # Only redirect authenticated users away from invalid pages
-    if current_user.is_authenticated and request.endpoint not in ["logout", "login"]:
-        return redirect(url_for("home"))
-    return redirect(url_for("login"))
 
 @webserver.route('/request', methods = ['POST'])
 async def request_stream():
     channel = grpc.aio.insecure_channel('host.docker.internal:50051')
     stub = ServerBaseStation_pb2_grpc.WebserverDroneCommuncationDetailsStub(channel)
-    
+
+    print("request recieved", flush=True)
+
     data = request.get_json()
-    id = data['id']
-    response = await stub.RequestDroneStream(ServerBaseStation_pb2.DroneStreamRequest(drone_id = id))
+
+    print(data,flush = True)
+    drone_id = data['drone_id']
+    basestation_id = data['basestation_id']
+    response = await stub.RequestDroneStream(ServerBaseStation_pb2.DroneStreamRequest(basestation_id= str(basestation_id) ,drone_id = str(drone_id)))
     reply = {"stream_id": response.stream_id, "offer": {"type": response.offer.type, "sdp": response.offer.sdp}}
     return jsonify(reply)
 
@@ -288,12 +286,25 @@ async def answer_stream():
     channel = grpc.aio.insecure_channel('host.docker.internal:50051')
     stub = ServerBaseStation_pb2_grpc.WebserverDroneCommuncationDetailsStub(channel)
 
+
     data = request.get_json()
-    answer = ServerBaseStation_pb2.StreamAnswer(stream_id=data['id'], 
+    print("answer recieved", data, flush=True)
+    answer = ServerBaseStation_pb2.StreamAnswer(basestation_id=data['basestation_id'],
+                                                stream_id=data['stream_id'], 
                                                 answer= ServerBaseStation_pb2.StreamDesc(type = data['answer']['type'],
                                                                                           sdp = data['answer']['sdp']))
+    print("A", answer)
     await stub.Answer(answer)
     return jsonify({})
+
+
+# -------------------- Error handlers --------------------
+@webserver.errorhandler(404)
+def not_found(e):
+    # Only redirect authenticated users away from invalid pages
+    if current_user.is_authenticated and request.endpoint not in ["logout", "login"]:
+        return redirect(url_for("home"))
+    return redirect(url_for("login"))
 
 
 @webserver.errorhandler(401)
@@ -306,4 +317,4 @@ def unauthorized(e):
 if __name__ == "__main__":
     context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
     context.load_cert_chain('cert.pem', 'key.pem')
-    webserver.run('0.0.0.0', port=5000, ssl_context=context, debug=True, use_reloader = False)
+    webserver.run('0.0.0.0', port=443, ssl_context=context, debug=True, use_reloader = False)
