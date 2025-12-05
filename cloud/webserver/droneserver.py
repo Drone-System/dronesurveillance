@@ -79,15 +79,15 @@ class WebserverDroneCommuncationDetails(ServerBaseStation_pb2_grpc.WebserverDron
     ) -> ServerBaseStation_pb2.AvailableDronesResponse:
         stream_ids = []
         for stream_id in self.communication.keys():
-            if stream_id.split("/")[0] == request.info.id:
+            if stream_id.split("/")[0] == request.basestation_id:
                 name = self.communication[stream_id].name
                 stream_ids.append(ServerBaseStation_pb2.DroneInfo(id=stream_id, name=name))
-        return ServerBaseStation_pb2.AvailableDronesResponse(stream_ids)    
+        return ServerBaseStation_pb2.AvailableDronesResponse(info=stream_ids)    
 
 async def main():
     communication = {}
     server = grpc.aio.server()
-    ServerBaseStation_pb2_grpc.add_DroneWebRtcServicer_to_server(DroneWebRtc(), server)
+    ServerBaseStation_pb2_grpc.add_WebserverDroneCommuncationDetailsServicer_to_server(WebserverDroneCommuncationDetails(communication), server)
     listen_addr = "[::]:50051"
     server.add_insecure_port(listen_addr)
     print("Starting server on ", listen_addr)
@@ -95,3 +95,6 @@ async def main():
     #asyncio.ensure_future(app.run('0.0.0.0', port=443, ssl_context=context, debug=False, use_reloader=False))
     #app.run('0.0.0.0', port=443, ssl_context=context, debug=True)
     await server.wait_for_termination()
+
+if __name__ == "__main__":
+    asyncio.run(main())

@@ -20,8 +20,6 @@ retry_delay = 2
 channel = grpc.aio.insecure_channel('localhost:50051')
 stub = ServerBaseStation_pb2_grpc.WebserverDroneCommuncationDetailsStub(channel)
 
-communication = ServerBaseStation_pb2_grpc.DroneWebRtcServicer
-
 for attempt in range(max_retries):
     try:
         conn = psycopg.connect(
@@ -189,10 +187,18 @@ def login():
 @webserver.route("/logout")
 @login_required
 def logout():
-    """Logout and redirect to login"""
-    logout_user()
-    session.clear()
-    return redirect(url_for("login"))
+    print(f"[LOGOUT] Before logout: authenticated={current_user.is_authenticated}", flush=True)
+    
+    logout_user()           # clear Flask-Login’s session
+    session.clear()         # clear Flask session
+    
+    # Explicitly remove the remember-me cookie
+    resp = make_response(redirect(url_for("login")))
+    resp.delete_cookie("remember_token")
+    
+    print(f"[LOGOUT] After logout: authenticated={current_user.is_authenticated}")
+    return resp
+
 
 @webserver.route("/home")
 @login_required
@@ -209,15 +215,50 @@ def home():
         session.clear()
         return redirect(url_for("login"))
 
+@webserver.route("/basestation/<int:basestation_id>")
+def basestation(basestation_id):
+    print("\n\n\n\n", flush=True)
+    print(basestation_id, flush=True)
+    print("\n\n\n\n", flush=True)
+    # check if user is allowed to request drones from that base station
+    # data = pd.read_sql("select id, name from basestations where id =ANY(select basestation_id from basestations_to_groups where group_id =ANY(select group_id from users_to_groups where user_id = %s));", conn, params=[current_user.id],)
 
-@webserver.route("/basestation")
-def basestation():
-    item_id = request.args.get("id")
+    basestations = pd.read_sql("select id, name from basestations where id = %s::integer", conn, params=[basestation_id],)
+    basestation_info = basestations.to_dict("records")[0]
 
-    if not item_id:
-        return "Missing id", 400
+    print("\n\n\n\n", flush=True)
+    print(basestation_info, flush=True)
+    print("\n\n\n\n", flush=True)
 
-    return render_template("droneview.html", basestation=item_id)
+    return render_template("basestationview.html", basestation=basestation_info)
+
+@webserver.route("/basestation/<int:basestation_id>/drones")
+async def droneview(basestation_id):
+    channel = grpc.aio.insecure_channel('host.docker.internal:50051')
+    stub = ServerBaseStation_pb2_grpc.WebserverDroneCommuncationDetailsStub(channel)
+    # check if user is allowed to request drones from that base station
+    # data = pd.read_sql("select id, name from basestations where id = ")
+    
+    drones = await stub.RequestAvailableDrones(ServerBaseStation_pb2.AvailableDroneRequest(basestation_id = str(basestation_id)))
+
+    if drones.info:
+        return render_template("droneview.html", basestation_id=basestation_id, drones = drones.info)
+    else:
+        return "NO DRONES AVAILABLE"
+
+@webserver.route("/basestation/<int:basestation_id>/drones/<int:drone_id>")
+async def dronestream(basestation_id, drone_id):  
+    # check if user is allowed to request drones from that base station
+    # data = pd.read_sql("select id, name from basestations where id = ")
+    
+    return render_template("dronestream.html", basestation_id=str(basestation_id), drone_id = str(drone_id))
+
+
+@webserver.route("/basestation/<int:basestation_id>/cameras")
+def basestation_cameras(basestation_id):  
+
+    return render_template("cameras.html")
+
 # -------------------- Error handlers --------------------
 @webserver.errorhandler(404)
 def not_found(e):
@@ -226,6 +267,29 @@ def not_found(e):
         return redirect(url_for("home"))
     return redirect(url_for("login"))
 
+@webserver.route('/request', methods = ['POST'])
+async def request_stream():
+    channel = grpc.aio.insecure_channel('host.docker.internal:50051')
+    stub = ServerBaseStation_pb2_grpc.WebserverDroneCommuncationDetailsStub(channel)
+    
+    data = request.get_json()
+    id = data['id']
+    response = await stub.RequestDroneStream(ServerBaseStation_pb2.DroneStreamRequest(drone_id = id))
+    reply = {"stream_id": response.stream_id, "offer": {"type": response.offer.type, "sdp": response.offer.sdp}}
+    return jsonify(reply)
+
+
+@webserver.route('/answer', methods = ['POST'])
+async def answer_stream():
+    channel = grpc.aio.insecure_channel('host.docker.internal:50051')
+    stub = ServerBaseStation_pb2_grpc.WebserverDroneCommuncationDetailsStub(channel)
+
+    data = request.get_json()
+    answer = ServerBaseStation_pb2.StreamAnswer(stream_id=data['id'], 
+                                                answer= ServerBaseStation_pb2.StreamDesc(type = data['answer']['type'],
+                                                                                          sdp = data['answer']['sdp']))
+    await stub.Answer(answer)
+    return jsonify({})
 
 
 @webserver.errorhandler(401)
@@ -233,38 +297,9 @@ def unauthorized(e):
     """Handle unauthorized access"""
     return redirect(url_for("login"))
 
-# #@webserver.route('/')
-# #def main():
-#     drones = stub.RequestAvailableDrones()
-#     return render_template('droneview.html', channel=communication)
 
-# #@webserver.route('/request', methods = ['POST'])
-# #async def somethingelse():
-#     data = request.get_json()
-#     id = data['id']
-#     if id not in communication:
-#         print(id)
-#         return jsonify({})
-#     channel = communication[id]
-#     channel.requested = True
-#     print(id, 'request true')
-#     while not channel.offer:
-#         await asyncio.sleep(0.5)
-#     print('read offer')
-#     offer = jsonify(channel.offer)
-#     channel.offer = {}
-#     return offer
-
-# #@webserver.route('/answer', methods = ['POST'])
-# #def answer():
-#     data = request.get_json()
-#     id = data['stream_id']
-#     communication[id].answer = data
-#     response = {}
-#     # print(data)
-#     return jsonify(response)
 # -------------------- Run --------------------
 if __name__ == "__main__":
     context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
     context.load_cert_chain('cert.pem', 'key.pem')
-    webserver.run('0.0.0.0', port=5000, ssl_context=context, debug=True)
+    webserver.run('0.0.0.0', port=5000, ssl_context=context, debug=True, use_reloader = False)
