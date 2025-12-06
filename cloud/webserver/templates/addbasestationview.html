@@ -6,6 +6,10 @@
     <link rel="stylesheet" href="../static/style.css">
 </head>
 <body>
+    {% if error %}
+    <div class="error">{{ error }}</div>
+    {% endif %}
+
     <div class="header">
         <h1>Add Basestations</h1>
         <div class="user-info">
@@ -16,6 +20,7 @@
     <form method="POST">
         <label for="bsid">Basetation Id:</label>
         <input type="text" name="bsid" id="bsid">
+        <input type="password" name="bspass" id="bspass">
         <button type="submit">Add BaseStation</button>
     </form>
     

@@ -19,8 +19,9 @@ simulated security incident scenarios.
 
 ## TODOS
 
-* [ ] Adjust database to not have groups
-* [ ] Connect cloud webserver to proper database and ajust permissions
+* [x] Adjust database to not have groups
+* [x] Connect cloud webserver to proper database and ajust permissions
+* [ ] Make basestation add and basestation user add and remove work
 * [ ] Develop Proxy server with grpc server
 * [ ] Develop Drone manager
 * [ ] Integrate basestation webserver with core and database
