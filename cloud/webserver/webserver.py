@@ -87,6 +87,18 @@ def load_user(user_id):
 def debug_request():
     print(f">>> {request.method} {request.path} | Authenticated={current_user.is_authenticated}")
 
+def user_has_access(basestation_id: int, admin: bool=False) -> bool:
+    user_id = current_user.id
+    string = "SELECT COUNT(1) FROM users_to_basestations \
+                            WHERE user_id=%s::integer AND basestation_id=%s::integer"
+    if admin:
+        string += " AND owner=TRUE"
+
+    data = pd.read_sql(string, conn, params=[user_id, basestation_id])
+    has_access = count_bs = data.to_dict()["count"][0] == 1
+
+    return has_access
+
 # -------------------- Routes --------------------
 @webserver.route("/")
 def index():
@@ -209,9 +221,11 @@ def logout():
 def home():
     """Protected home page"""
     try:
-        data = pd.read_sql("select id, name from basestations where id =ANY(select basestation_id from basestations_to_groups where group_id =ANY(select group_id from users_to_groups where user_id = %s));", conn, params=[current_user.id],)
+        data = pd.read_sql("select id, name from basestations \
+                INNER JOIN users_to_basestations ON basestations.id=users_to_basestations.basestation_id \
+                where users_to_basestations.user_id=%s;", conn, params=[current_user.id],)
         items = data.to_dict("records")
-        print(items)
+        print(items, current_user.id, flush=True)
         return render_template("index.html", items=items, username=current_user.username)
     except Exception as e:
         print(f"Error loading home page: {e}")
@@ -229,6 +243,29 @@ def add_basestation():
     # basestation_info = basestations.to_dict("records")[0]
     if request.method == 'POST':
         id = request.form.get("bsid")
+        password = request.form.get("bspass")
+        
+        data = pd.read_sql("select count(*) from basestations where id=%s::integer", conn, params=[id,])
+        count_bs = data.to_dict()["count"][0]
+        
+        print(count_bs)
+        if count_bs == 0:
+            return render_template("addbasestationview.html", 
+                error="No basestation with specified id. Please first connect a basestation.")
+        data = pd.read_sql("select count(*) from users_to_basestations where basestation_id=%s::integer AND owner=TRUE", conn, params=[id,])
+        count_bs = data.to_dict()["count"][0]
+        if count_bs != 0:
+            return render_template("addbasestationview.html", 
+                error="Basestation already has a owner. Ask the owner for access.")
+
+        print(id, password, flush=True)
+        result = pd.read_sql("select verify_basestation(%s, %s::text)", conn, params=[id, password])
+
+        print("RESULT", result, flush=True)
+
+
+
+
 
         # check if basestation id exists
         # check if id has already an owner
@@ -241,11 +278,8 @@ def add_basestation():
 
 @webserver.route("/basestation/<int:basestation_id>")
 def basestation(basestation_id):
-    print("\n\n\n\n", flush=True)
-    print(basestation_id, flush=True)
-    print("\n\n\n\n", flush=True)
-    # check if user is allowed to request drones from that base station
-    # data = pd.read_sql("select id, name from basestations where id =ANY(select basestation_id from basestations_to_groups where group_id =ANY(select group_id from users_to_groups where user_id = %s));", conn, params=[current_user.id],)
+    if not user_has_access(basestation_id):
+        return "Unauthorized"
 
     basestations = pd.read_sql("select id, name from basestations where id = %s::integer", conn, params=[basestation_id],)
     basestation_info = basestations.to_dict("records")[0]
@@ -254,10 +288,12 @@ def basestation(basestation_id):
     print(basestation_info, flush=True)
     print("\n\n\n\n", flush=True)
 
-    return render_template("basestationview.html", basestation=basestation_info, admin=False)
+    return render_template("basestationview.html", basestation=basestation_info, admin=user_has_access(basestation_id, True))
 
 @webserver.route("/basestation/<int:basestation_id>/drones")
 async def droneview(basestation_id):
+    if not user_has_access(basestation_id):
+        return "Unauthorized"
     channel = grpc.aio.insecure_channel('host.docker.internal:50051')
     stub = ServerBaseStation_pb2_grpc.WebserverDroneCommuncationDetailsStub(channel)
     # check if user is allowed to request drones from that base station
@@ -279,6 +315,9 @@ async def dronestream(basestation_id, drone_id):
 
 @webserver.route("/basestation/<int:basestation_id>/adduser", methods=['GET', 'POST'])
 def basestation_adduser(basestation_id):
+    if not user_has_access(basestation_id, True):
+        return "Unauthorized"
+
     if request.method == 'POST':
         user = request.form.get("user")
         # add user to basestation
@@ -290,7 +329,8 @@ def basestation_adduser(basestation_id):
 
 @webserver.route("/basestation/<int:basestation_id>/cameras")
 def basestation_cameras(basestation_id):  
-
+    if not user_has_access(basestation_id):
+        return "Unauthorized"
     return render_template("cameras.html")
 
 
@@ -299,13 +339,17 @@ async def request_stream():
     channel = grpc.aio.insecure_channel('host.docker.internal:50051')
     stub = ServerBaseStation_pb2_grpc.WebserverDroneCommuncationDetailsStub(channel)
 
-    print("request recieved", flush=True)
+    print("request received", flush=True)
 
     data = request.get_json()
 
-    print(data,flush = True)
     drone_id = data['drone_id']
     basestation_id = data['basestation_id']
+
+    if not user_has_access(basestation_id):
+        print("Request Unauthorized", flush=True)
+        return jsonify({})
+
     response = await stub.RequestDroneStream(ServerBaseStation_pb2.DroneStreamRequest(basestation_id= str(basestation_id) ,drone_id = str(drone_id)))
     reply = {"stream_id": response.stream_id, "offer": {"type": response.offer.type, "sdp": response.offer.sdp}}
     return jsonify(reply)
@@ -316,9 +360,12 @@ async def answer_stream():
     channel = grpc.aio.insecure_channel('host.docker.internal:50051')
     stub = ServerBaseStation_pb2_grpc.WebserverDroneCommuncationDetailsStub(channel)
 
-
     data = request.get_json()
-    print("answer recieved", data, flush=True)
+    print("answer received", data, flush=True)
+    if not user_has_access(data['basestation_id']):
+        print("Answer Unauthorized", flush=True)
+        return jsonify({})
+
     answer = ServerBaseStation_pb2.StreamAnswer(basestation_id=data['basestation_id'],
                                                 stream_id=data['stream_id'], 
                                                 answer= ServerBaseStation_pb2.StreamDesc(type = data['answer']['type'],
