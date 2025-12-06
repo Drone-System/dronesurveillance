@@ -6,24 +6,26 @@
     <link rel="stylesheet" href="../static/style.css">
 </head>
 <body>
+    {% if error %}
+    <div class="error">{{ error }}</div>
+    {% endif %}
+
     <div class="header">
-        <h1>Base Stations</h1>
+        <h1>Add Basestations</h1>
         <div class="user-info">
             <span class="username">{{ username }}</span>
             <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
         </div>
     </div>
+    <form method="POST">
+        <label for="bsid">Basetation Id:</label>
+        <input type="text" name="bsid" id="bsid">
+        <input type="password" name="bspass" id="bspass">
+        <button type="submit">Add BaseStation</button>
+    </form>
     
-    <ul class="add-basestation">
-        <a href="/basestation/add">Add New Basestation</aa>
-    </ul>
+    <ul>
 
-    <ul class="basestation-list">
-        {% for item in items %}
-            <li>
-                <a href="/basestation/{{ item.id }}">{{ item.name }}</a>
-            </li>
-        {% endfor %}
     </ul>
 
 </body>

@@ -7,23 +7,20 @@
 </head>
 <body>
     <div class="header">
-        <h1>Base Stations</h1>
+        <h1>Add Basestations</h1>
         <div class="user-info">
             <span class="username">{{ username }}</span>
             <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
         </div>
     </div>
+    <form method="POST">
+        <label for="username">Username:</label>
+        <input type="text" name="user" id="user">
+        <button type="submit">Add User to Basestation</button>
+    </form>
     
-    <ul class="add-basestation">
-        <a href="/basestation/add">Add New Basestation</aa>
-    </ul>
+    <ul>
 
-    <ul class="basestation-list">
-        {% for item in items %}
-            <li>
-                <a href="/basestation/{{ item.id }}">{{ item.name }}</a>
-            </li>
-        {% endfor %}
     </ul>
 
 </body>
