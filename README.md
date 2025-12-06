@@ -20,9 +20,10 @@ simulated security incident scenarios.
 ## TODOS
 
 * [ ] Adjust database to not have groups
-* [ ] COnnect cloud webserver to proper database and ajust permissions
+* [ ] Connect cloud webserver to proper database and ajust permissions
 * [ ] Develop Proxy server with grpc server
 * [ ] Develop Drone manager
 * [ ] Integrate basestation webserver with core and database
 * [ ] Integrate drone manager with camera manager
+* [ ] Deploy cloud part with IaC into aws
 * [ ] CELEBRATE
