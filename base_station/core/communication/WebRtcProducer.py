@@ -67,9 +67,14 @@ class WebRTCProducer:
         response = await self.stub.Connect(ServerBaseStation_pb2.ConnectRequest())
         print("some")
         # generate session id
-        self.stream_id = f"{self.basestation_id}/{response.stream_id}"
+        self.stream_id = response.stream_id
         self.name = self.stream_name
-        response = await self.stub.Register(ServerBaseStation_pb2.RegisterProducerRequest(stream_id=self.stream_id, name=self.name))
+        response = await self.stub.Register(
+                        ServerBaseStation_pb2.RegisterProducerRequest(
+                            basestation_id=self.basestation_id, 
+                            stream_id=self.stream_id, 
+                            name=self.name
+                        ))
         print("some")
         await self.__on_start_stream()
         response = await self.stub.Stream(

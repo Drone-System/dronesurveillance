@@ -37,3 +37,6 @@ class DatabaseManager:
 
     def GetCameraNameById(self, cam_id: int):
         return "Some Name"
+    
+    def pollDrones(self):
+        return []

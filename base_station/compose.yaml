@@ -27,7 +27,7 @@ services:
 
   db:
     image: postgres:17
-    container_name: postgres_db
+    container_name: bs_postgres_db
     env_file: "core/.env"
     volumes:
      - db:/var/lib/postgresql/data/
