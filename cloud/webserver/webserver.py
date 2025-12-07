@@ -294,12 +294,12 @@ def basestation(basestation_id):
 async def droneview(basestation_id):
     if not user_has_access(basestation_id):
         return "Unauthorized"
-    channel = grpc.aio.insecure_channel('host.docker.internal:50051')
+    channel = grpc.aio.insecure_channel('proxy_server:50051')
     stub = ServerBaseStation_pb2_grpc.WebserverDroneCommuncationDetailsStub(channel)
     # check if user is allowed to request drones from that base station
     # data = pd.read_sql("select id, name from basestations where id = ")
     
-    drones = await stub.RequestAvailableDrones(ServerBaseStation_pb2.AvailableDroneRequest(basestation_id = str(basestation_id)))
+    drones = await stub.RequestAvailableDrones(ServerBaseStation_pb2.AvailableDroneRequest(basestation_id=basestation_id))
 
     if drones.info:
         return render_template("droneview.html", basestation_id=basestation_id, drones = drones.info)
@@ -311,7 +311,7 @@ async def dronestream(basestation_id, drone_id):
     # check if user is allowed to request drones from that base station
     # data = pd.read_sql("select id, name from basestations where id = ")
     
-    return render_template("dronestream.html", basestation_id=str(basestation_id), drone_id = str(drone_id))
+    return render_template("dronestream.html", basestation_id=basestation_id, drone_id = str(drone_id))
 
 @webserver.route("/basestation/<int:basestation_id>/adduser", methods=['GET', 'POST'])
 def basestation_adduser(basestation_id):
