@@ -22,10 +22,12 @@ simulated security incident scenarios.
 * [x] Adjust database to not have groups
 * [x] Connect cloud webserver to proper database and ajust permissions
 * [ ] Make basestation add and basestation user add and remove work
-* [ ] Develop Proxy server with grpc server
+* [x] Develop Proxy server with grpc server
+* [x] Show cameras in browser
+* [ ] Filter cameras by basestation with permissions
 * [ ] Make Grpc use secure connection
-* [ ] Develop Drone manager
+* [x] Develop Drone manager
 * [ ] Integrate basestation webserver with core and database
-* [ ] Integrate drone manager with camera manager
+* [x] Integrate drone manager with camera manager
 * [ ] Deploy cloud part with IaC into aws
 * [ ] CELEBRATE

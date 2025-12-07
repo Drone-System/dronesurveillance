@@ -26,7 +26,8 @@ async def main():
         sleep(1)
         async with grpc.aio.insecure_channel(address) as channel:
             stub = ServerBaseStation_pb2_grpc.CloudStub(channel)
-            identifier =  await stub.Connect(ServerBaseStation_pb2.ConnectToCloudRequest(name=name, password=password))
+            response =  await stub.Connect(ServerBaseStation_pb2.ConnectToCloudRequest(name=name, password=password))
+            identifier = response.id
 
     print("Got Id:", identifier)
     camManager = CameraManager(identifier, name, dbMan)

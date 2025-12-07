@@ -1,6 +1,10 @@
 from VideoReceiver import VideoReceiver
 import ServerBaseStation_pb2, ServerBaseStation_pb2_grpc
 import grpc
+import uuid
+from aiortc import RTCPeerConnection, RTCSessionDescription
+from aiortc.contrib.media import MediaRecorder, MediaRelay
+import asyncio
 
 class WebRTCReceiver(ServerBaseStation_pb2_grpc.WebRtcServicer):
     def __init__(self):
@@ -15,7 +19,7 @@ class WebRTCReceiver(ServerBaseStation_pb2_grpc.WebRtcServicer):
         request: ServerBaseStation_pb2.ConnectRequest,
         context: grpc.aio.ServicerContext,
     ) -> ServerBaseStation_pb2.ConnectResponse:
-        print("Connected")
+        print("Connected", flush=True)
         return ServerBaseStation_pb2.ConnectResponse(stream_id=str(uuid.uuid4()))
 
     async def Register(
