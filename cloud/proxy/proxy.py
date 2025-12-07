@@ -12,6 +12,10 @@ async def main(signal):
 
     communication = {}
     database = Database()
+    bids = database.getBasestations()
+    for i in bids:
+        communication[i] = {}
+
     server = grpc.aio.server()
     ServerBaseStation_pb2_grpc.add_WebRtcServicer_to_server(
         WebRTCReceiver(), server)

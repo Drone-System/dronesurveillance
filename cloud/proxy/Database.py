@@ -72,3 +72,11 @@ class Database:
                 res += 1
 
         return res
+    
+    def getBasestations(self):
+        res = []
+        with self.conn.cursor() as cur:
+            cur.execute("SELECT id from basestations")
+            res = cur.fetchall()
+            # id = row[0]
+        return [e[0] for e in res]
