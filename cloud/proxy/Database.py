@@ -37,11 +37,25 @@ class Database:
         id = -1
         # return id
         with self.conn.cursor() as cur:
-            cur.execute("CALL create_basestation(%s, %s)", basestation_name, password)
-            cur.execute("SELECT id from basestations where name=%s", basestation_name)
+            cur.execute("SELECT id from basestations where name=%s", (basestation_name, ))
             row = cur.fetchone()
-            id = row[0]
-        self.time[id] = datetime.now()
+            if row:
+                id = row[0]
+                cur.execute("select verify_basestation(%s, %s::text)", (id, password))
+                row = cur.fetchone()
+                if not row[0]:
+                    raise Exception("Basestation Name already registered try another name")
+                    return -1
+
+            else:
+                cur.execute("CALL create_basestation(%s, %s)", (basestation_name, password))
+                cur.execute("SELECT id from basestations where name=%s", (basestation_name, ))
+                row = cur.fetchone()
+                id = row[0]
+            
+                
+
+        self.times[id] = datetime.now()
 
         return id
 
@@ -62,7 +76,7 @@ class Database:
     def doCleanUp(self) -> int:
         # return number of basestations deleted
         to_delete = []
-        for basestation, time in self.times:
+        for basestation, time in self.times.items():
             if datetime.now() >= time + timedelta(minutes=5):
                 to_delete.append(basestation)
         
@@ -70,6 +84,7 @@ class Database:
         for b in to_delete:
             if self.removeBasestation(b):
                 res += 1
+                self.times.pop(b)
 
         return res
     

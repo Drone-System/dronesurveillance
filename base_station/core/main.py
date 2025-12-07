@@ -1,4 +1,5 @@
 from camera.CameraManager import CameraManager
+from drone.DroneManager import DroneManager
 from camera.IpCamera import IpCamera
 from DatabaseManager.DatabaseManager import DatabaseManager
 from multiprocessing import Process
@@ -18,17 +19,20 @@ async def main():
     # TODO: Change insecure channel https://github.com/grpc/grpc/tree/master/examples/python/auth
     # TODO: Make ip and port configurable in .env
     identifier = -1
-    name = CONFIG.get("NAME") #This should be written in a configuaration file
+    name = CONFIG.get("BASESTATION_NAME") #This should be written in a configuaration file
+    password = CONFIG.get("BASESTATION_PASSWORD")
     address = f"{CONFIG.get('GRPC_REMOTE_IP')}:{CONFIG.get('GRPC_REMOTE_PORT')}"
-    # while identifier == -1:
-    #     sleep(1)
-    #     async with grpc.aio.insecure_channel(address) as channel:
-    #         stub = ServerBaseStation_pb2_grpc.CloudStub(channel)
-    #         identifier =  await stub.Connect(ServerBaseStation_pb2.ConnectToCloudRequest(name=name))
+    while identifier == -1:
+        sleep(1)
+        async with grpc.aio.insecure_channel(address) as channel:
+            stub = ServerBaseStation_pb2_grpc.CloudStub(channel)
+            identifier =  await stub.Connect(ServerBaseStation_pb2.ConnectToCloudRequest(name=name, password=password))
 
+    print("Got Id:", identifier)
     camManager = CameraManager(identifier, name, dbMan)
+    droneManager = DroneManager(identifier, name, dbMan)
     print("Started")
-    await camManager.run()
+    await asyncio.gather(camManager.run(), droneManager.run())
 
 
     

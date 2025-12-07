@@ -13,7 +13,7 @@ from aiortc.contrib.media import MediaPlayer
 
 class DroneManager:
     
-    def __init__(self, id: str, name: str, dbMan: DatabaseManager):
+    def __init__(self, id: int, name: str, dbMan: DatabaseManager):
         '''
         self.cameras is a dictionary where
             - Keys: camera ids
