@@ -46,7 +46,7 @@ service WebRtc {
 
 message RegisterProducerRequest {
     uint32 basestation_id = 1;
-    string sid = 2;
+    string stream_id = 2;
     string name = 3;
 }
 message RegisterProducerResponse {

@@ -13,6 +13,7 @@ class Cloud(ServerBaseStation_pb2_grpc.CloudServicer):
         context: grpc.aio.ServicerContext,
     ) -> ServerBaseStation_pb2.ConnectToCloudResponse:
         # register in database
+        print("Received connection request from db", request.name)
         bs_id = self.db.registerBasestation(request.name, request.password)
         return ServerBaseStation_pb2.ConnectToCloudResponse(id=bs_id)
     

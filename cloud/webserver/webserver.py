@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, request, url_for, flash, session, make_response, jsonify
+from flask import Flask, render_template, redirect, request, url_for, flash, session, make_response, jsonify, Response
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 import pandas as pd
 import psycopg
@@ -10,7 +10,9 @@ import ServerBaseStation_pb2, ServerBaseStation_pb2_grpc
 import uuid
 import asyncio
 from threading import Thread
-
+import redis
+import re
+import base64
 
 # -------------------- Database --------------------
 # Retry connection logic for Docker startup
@@ -39,6 +41,22 @@ for attempt in range(max_retries):
         else:
             print(f"Failed to connect to database after {max_retries} attempts")
             raise
+
+#--------------------- Redis setup --------------------
+
+try:
+    r = redis.Redis(host='red', port=6379, db=0, socket_connect_timeout=5)
+    r.ping()
+    print("Connected to Redis successfully!")
+except redis.ConnectionError as e:
+    print(f"ERROR: Cannot connect to Redis server at localhost:6379")
+    print(f"Details: {e}")
+    print("\nPlease start Redis first:")
+    print("  - Ubuntu/Debian: sudo systemctl start redis-server")
+    print("  - Docker: docker run -d -p 6379:6379 redis")
+    print("  - macOS: brew services start redis")
+    exit(1)
+
 
 # -------------------- Flask setup --------------------
 webserver = Flask(__name__)
@@ -331,7 +349,8 @@ def basestation_adduser(basestation_id):
 def basestation_cameras(basestation_id):  
     if not user_has_access(basestation_id):
         return "Unauthorized"
-    return render_template("cameras.html")
+    streams = get_active_streams()
+    return render_template("cameraview.html", streams=streams)
 
 
 @webserver.route('/request', methods = ['POST'])
@@ -374,6 +393,94 @@ async def answer_stream():
     await stub.Answer(answer)
     return jsonify({})
 
+
+def get_active_streams():
+    """
+    Discover all active video streams by checking for latest_frame keys in Redis
+    Only returns streams that have active heartbeats (updated within last 5 seconds)
+    Returns a list of stream channel names
+    """
+    streams = []
+    
+    # Get all keys that match the pattern 'latest_frame_*'
+    keys = r.keys('latest_frame_*')
+    print("keys:",keys, flush=True)
+    for key in keys:
+        # Extract channel name from key (remove 'latest_frame_' prefix)
+        key_str = key.decode('utf-8') if isinstance(key, bytes) else key
+        channel_name = key_str.replace('latest_frame_', '')
+        
+        # Check if stream has an active heartbeat
+        heartbeat_key = f'heartbeat_{channel_name}'
+        heartbeat = r.get(heartbeat_key)
+        
+        # Only include streams with active heartbeat
+        if heartbeat:
+            # Extract camera identifier for display (e.g., "camera0" from "video_stream_camera0")
+            camera_match = re.search(r'camera(\d+)', channel_name)
+            if camera_match:
+                camera_id = camera_match.group(1)
+                display_name = f"Camera {camera_id}"
+            else:
+                # Use channel name as display name if no camera pattern found
+                display_name = channel_name.replace('video_stream_', '').replace('_', ' ').title()
+            
+            streams.append({
+                'channel': channel_name,
+                'display_name': display_name,
+                'camera_id': camera_match.group(1) if camera_match else channel_name
+            })
+    
+    # Sort by camera ID or channel name
+    streams.sort(key=lambda x: x['camera_id'])
+    
+    return streams
+
+@webserver.route('/api/streams')
+def api_streams():
+    """API endpoint to get list of active streams"""
+    streams = get_active_streams()
+    return jsonify(streams)
+
+def generate_frames(channel_name):
+    """
+    Generator function that yields video frames from a specific Redis channel
+    
+    Args:
+        channel_name: Redis pub/sub channel name to subscribe to
+    """
+    pubsub = r.pubsub()
+    pubsub.subscribe(channel_name)
+    
+    print(f"Subscribed to {channel_name}...")
+    
+    # Try to get the latest frame first for immediate display
+    latest = r.get(f'latest_frame_{channel_name}')
+    if latest:
+        jpg_data = base64.b64decode(latest)
+        yield (b'--frame\r\n'
+               b'Content-Type: image/jpeg\r\n\r\n' + jpg_data + b'\r\n')
+    
+    # Stream frames from pub/sub
+    for message in pubsub.listen():
+        if message['type'] == 'message':
+            try:
+                # Decode the base64 frame
+                jpg_data = base64.b64decode(message['data'])
+                
+                # Yield frame in multipart format
+                yield (b'--frame\r\n'
+                       b'Content-Type: image/jpeg\r\n\r\n' + jpg_data + b'\r\n')
+            except Exception as e:
+                print(f"Error processing frame from {channel_name}: {e}")
+                continue
+
+
+@webserver.route('/video_feed/<channel_name>')
+def video_feed(channel_name):
+    """Dynamic video streaming route for any channel"""
+    return Response(generate_frames(channel_name),
+                    mimetype='multipart/x-mixed-replace; boundary=frame')
 
 # -------------------- Error handlers --------------------
 @webserver.errorhandler(404)

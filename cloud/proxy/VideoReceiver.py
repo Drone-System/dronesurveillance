@@ -1,6 +1,10 @@
 from av import VideoFrame
 import base64
 import asyncio
+import redis
+from datetime import datetime
+import time
+import cv2
 
 class VideoReceiver:
     def __init__(self, stream_id, name):
@@ -9,7 +13,7 @@ class VideoReceiver:
         self.stream_id = stream_id.replace("/", "_") + "_" + name
         # self.name = name
         try:
-            self.r = redis.Redis(host='localhost', port=6379, db=0, socket_connect_timeout=5)
+            self.r = redis.Redis(host='red', port=6379, db=0, socket_connect_timeout=5)
             self.r.ping()  # Test connection
             print("Connected to Redis successfully!")
         except redis.ConnectionError as e:

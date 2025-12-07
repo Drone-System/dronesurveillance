@@ -64,7 +64,7 @@ class WebRTCProducer:
         print("some")
         self.stub = ServerBaseStation_pb2_grpc.WebRtcStub(channel)
         print("some")
-        response = await self.stub.Connect(ServerBaseStation_pb2.ConnectRequest())
+        response = await self.stub.Connect(ServerBaseStation_pb2.ConnectRequest(basestation_id=self.basestation_id, name=self.stream_name))
         print("some")
         # generate session id
         self.stream_id = response.stream_id

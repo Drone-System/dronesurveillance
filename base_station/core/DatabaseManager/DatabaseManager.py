@@ -33,7 +33,6 @@ class DatabaseManager:
             return IpCamera(2)
         else:
             return IpCamera(0)
-            # return IpCamera("udp://192.168.111.6:3000")
 
     def GetCameraNameById(self, cam_id: int):
         return "Some Name"
