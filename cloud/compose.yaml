@@ -1,4 +1,14 @@
 services:
+  proxy:
+    build: proxy/
+    container_name: proxy_server
+    ports:
+      - 50051:50051
+    depends_on:
+      db:
+        condition: service_healthy
+        restart: true
+
   webserver:
     build: webserver/
     container_name: server

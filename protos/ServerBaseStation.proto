@@ -6,7 +6,7 @@ service DroneWebRtc {
     rpc Stream (StreamOffer) returns (StreamAnswer);
 }
 message PollRequest {
-    string basestation_id = 1;
+    uint32 basestation_id = 1;
     string stream_id = 2;
 }
 message PollResponse {
@@ -19,15 +19,20 @@ message StreamRequest {
 
 service Cloud {
     rpc Connect(ConnectToCloudRequest) returns (ConnectToCloudResponse);
+    rpc Ping(PingRequest) returns (PingResponse);
 }
 
 message ConnectToCloudRequest {
     string name = 1;
+    string password = 2;
 }
-
 message ConnectToCloudResponse {
-    string id = 1;
+    uint32 id = 1;
 }
+message PingRequest {
+    uint32 id = 1;
+}
+message PingResponse {}
 
 service WebRtc {
 
@@ -40,8 +45,9 @@ service WebRtc {
 
 
 message RegisterProducerRequest {
-    string sid = 1;
-    string name = 2;
+    uint32 basestation_id = 1;
+    string sid = 2;
+    string name = 3;
 }
 message RegisterProducerResponse {
     string stream_id = 1;
@@ -70,18 +76,18 @@ message StreamDesc {
     string sdp = 2;
 }
 message StreamOffer {
-    string basestation_id = 1;
+    uint32 basestation_id = 1;
     string stream_id = 2;
     StreamDesc offer = 3;
 }
 message StreamAnswer {
-    string basestation_id = 1;
+    uint32 basestation_id = 1;
     string stream_id = 2;
     StreamDesc answer = 3;
 }
 
 message ConnectRequest {
-    string basestation_id = 1;
+    uint32 basestation_id = 1;
     string name = 2;
 }
 
@@ -101,12 +107,12 @@ service WebserverDroneCommuncationDetails{
 }
 
 message  DroneStreamRequest{
-    string basestation_id = 1;
+    uint32 basestation_id = 1;
     string drone_id = 2;
 }
 
 message AvailableDroneRequest {
-    string basestation_id = 1;
+    uint32 basestation_id = 1;
 }
 
 message AvailableDronesResponse {
@@ -114,7 +120,7 @@ message AvailableDronesResponse {
 }
 
 message DroneInfo {
-    string id = 1;
+    uint32 id = 1;
     string name = 2;
 }
 

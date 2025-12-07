@@ -1,5 +1,6 @@
 from VideoReceiver import VideoReceiver
 import ServerBaseStation_pb2, ServerBaseStation_pb2_grpc
+import grpc
 
 class WebRTCReceiver(ServerBaseStation_pb2_grpc.WebRtcServicer):
     def __init__(self):

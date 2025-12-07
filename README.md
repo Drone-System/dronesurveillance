@@ -23,6 +23,7 @@ simulated security incident scenarios.
 * [x] Connect cloud webserver to proper database and ajust permissions
 * [ ] Make basestation add and basestation user add and remove work
 * [ ] Develop Proxy server with grpc server
+* [ ] Make Grpc use secure connection
 * [ ] Develop Drone manager
 * [ ] Integrate basestation webserver with core and database
 * [ ] Integrate drone manager with camera manager
