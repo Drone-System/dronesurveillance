@@ -1,6 +1,7 @@
 import psycopg
 from environment import CONFIG
 from camera.IpCamera import IpCamera
+from drone.DjiTello import DjiTelloDrone
 
 class DatabaseManager:
     
@@ -38,4 +39,10 @@ class DatabaseManager:
         return "Some Name"
     
     def pollDrones(self):
-        return []
+        return [(1, )]
+
+    def getDroneById(self, drone_id):
+        return DjiTelloDrone
+
+    def getDroneNameById(self, drone_id):
+        return "My Drone"
