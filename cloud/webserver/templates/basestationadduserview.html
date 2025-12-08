@@ -6,11 +6,8 @@
     <link rel="stylesheet" href="../static/style.css">
 </head>
 <body>
-    {% if error %}
-    <div class="error">{{ error }}</div>
-    {% endif %}
     <div class="header">
-        <h1>Add Users to Basestation</h1>
+        <h1>Add Basestations</h1>
         <div class="user-info">
             <span class="username">{{ username }}</span>
             <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
@@ -23,12 +20,8 @@
         <button type="submit">Add User to Basestation</button>
     </form>
     
-    <ul class="user-list">
-        {% for item in items %}
-            <li>
-                <p>{{ item.username }}</p>
-            </li>
-        {% endfor %}
+    <ul>
+
     </ul>
 
 </body>
