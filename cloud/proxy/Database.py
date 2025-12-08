@@ -59,11 +59,10 @@ class Database:
 
         return id
 
-    def removeBasestation(self, basestation_id: int) -> bool:
+    def deactivateBasestation(self, basestation_id: int) -> bool:
 
-        # remove from db with id
-
-        # return true if success false if not
+        with self.conn.cursor() as cur:
+            cur.execute("UPDATE basestations SET active = false where basestation_id =%s", (basestation_id, ))
 
         return True
 
@@ -82,7 +81,7 @@ class Database:
         
         res = 0
         for b in to_delete:
-            if self.removeBasestation(b):
+            if self.deactivateBasestation(b):
                 res += 1
                 self.times.pop(b)
 
