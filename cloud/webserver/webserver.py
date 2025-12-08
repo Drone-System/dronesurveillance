@@ -49,12 +49,7 @@ try:
     r.ping()
     print("Connected to Redis successfully!")
 except redis.ConnectionError as e:
-    print(f"ERROR: Cannot connect to Redis server at localhost:6379")
-    print(f"Details: {e}")
-    print("\nPlease start Redis first:")
-    print("  - Ubuntu/Debian: sudo systemctl start redis-server")
-    print("  - Docker: docker run -d -p 6379:6379 redis")
-    print("  - macOS: brew services start redis")
+    print(f"ERROR: Cannot connect to Redis server.")
     exit(1)
 
 
@@ -349,7 +344,7 @@ def basestation_adduser(basestation_id):
 def basestation_cameras(basestation_id):  
     if not user_has_access(basestation_id):
         return "Unauthorized"
-    streams = get_active_streams()
+    streams = get_active_streams(basestation_id)
     return render_template("cameraview.html", streams=streams)
 
 
@@ -394,7 +389,7 @@ async def answer_stream():
     return jsonify({})
 
 
-def get_active_streams():
+def get_active_streams(basestation_id):
     """
     Discover all active video streams by checking for latest_frame keys in Redis
     Only returns streams that have active heartbeats (updated within last 5 seconds)
@@ -416,31 +411,25 @@ def get_active_streams():
         
         # Only include streams with active heartbeat
         if heartbeat:
-            # Extract camera identifier for display (e.g., "camera0" from "video_stream_camera0")
-            camera_match = re.search(r'camera(\d+)', channel_name)
-            if camera_match:
-                camera_id = camera_match.group(1)
-                display_name = f"Camera {camera_id}"
-            else:
-                # Use channel name as display name if no camera pattern found
-                display_name = channel_name.replace('video_stream_', '').replace('_', ' ').title()
-            
-            streams.append({
-                'channel': channel_name,
-                'display_name': display_name,
-                'camera_id': camera_match.group(1) if camera_match else channel_name
-            })
-    
-    # Sort by camera ID or channel name
-    streams.sort(key=lambda x: x['camera_id'])
+            fields = channel_name.split("*")
+            display_name = fields[2]
+            b_id = fields[0]
+            if b_id == basestation_id:
+                streams.append({
+                    'channel': channel_name,
+                    'display_name': display_name,
+                    'basestation_id': b_id
+                })
+
+    streams.sort(key=lambda x: x['display_name'])
     
     return streams
 
-@webserver.route('/api/streams')
-def api_streams():
-    """API endpoint to get list of active streams"""
-    streams = get_active_streams()
-    return jsonify(streams)
+# @webserver.route('/api/streams')
+# def api_streams():
+#     """API endpoint to get list of active streams"""
+#     streams = get_active_streams()
+#     return jsonify(streams)
 
 def generate_frames(channel_name):
     """
@@ -479,6 +468,8 @@ def generate_frames(channel_name):
 @webserver.route('/video_feed/<channel_name>')
 def video_feed(channel_name):
     """Dynamic video streaming route for any channel"""
+    if not user_has_access(channel_name.split("*")[0]):
+        return "Unauthorized"
     return Response(generate_frames(channel_name),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 

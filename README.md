@@ -29,5 +29,6 @@ simulated security incident scenarios.
 * [x] Develop Drone manager
 * [ ] Integrate basestation webserver with core and database
 * [x] Integrate drone manager with camera manager
+* [ ] Add env to cloud
 * [ ] Deploy cloud part with IaC into aws
 * [ ] CELEBRATE

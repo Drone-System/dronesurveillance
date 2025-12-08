@@ -63,7 +63,7 @@ class WebRTCReceiver(ServerBaseStation_pb2_grpc.WebRtcServicer):
                 relay = MediaRelay()
 
                 mrec.addTrack(relay.subscribe(track))
-                video_receiver= VideoReceiver(request.stream_id,  self.producers[request.stream_id]['name']) 
+                video_receiver= VideoReceiver(self.basestation_id, request.stream_id,  self.producers[request.stream_id]['name']) 
                 signal = asyncio.Event()
                 asyncio.ensure_future(video_receiver.handle_track(relay.subscribe(track), request.stream_id, signal))
                 await mrec.start()
