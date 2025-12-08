@@ -1,6 +1,7 @@
 import ServerBaseStation_pb2, ServerBaseStation_pb2_grpc
 from channel import Channel
 import grpc
+import asyncio
 
 class WebserverDroneCommuncationDetails(ServerBaseStation_pb2_grpc.WebserverDroneCommuncationDetailsServicer):
     def __init__(self, communication: dict):
