@@ -236,7 +236,8 @@ def home():
     try:
         data = pd.read_sql("select id, name from basestations \
                 INNER JOIN users_to_basestations ON basestations.id=users_to_basestations.basestation_id \
-                where users_to_basestations.user_id=%s;", conn, params=[current_user.id],)
+                where users_to_basestations.user_id=%s and \
+                basestations.active = True;", conn, params=[current_user.id],)
         items = data.to_dict("records")
         print(items, current_user.id, flush=True)
         return render_template("index.html", items=items, username=current_user.username)
@@ -275,6 +276,8 @@ def add_basestation():
         result = pd.read_sql("select verify_basestation(%s, %s::text)", conn, params=[id, password])
 
         print("RESULT", result, flush=True)
+
+
 
 
 
@@ -330,15 +333,62 @@ async def dronestream(basestation_id, drone_id):
 def basestation_adduser(basestation_id):
     if not user_has_access(basestation_id, True):
         return "Unauthorized"
+    
+    data = pd.read_sql("select username from users where id =ANY(select user_id from users_to_basestations where basestation_id = %s and owner = False)", conn, params=[basestation_id])
+    items = data.to_dict("records")
+    print(items, current_user.id, flush=True)
 
     if request.method == 'POST':
         user = request.form.get("user")
-        # add user to basestation
+        with conn.cursor() as cur:
+            cur.execute("select id from users where username = %s", (user, ))
+            row = cur.fetchone()
+            user_id = row[0] if row else None
+            if not user_id:
+                return render_template("basestationadduserview.html", error="User does not exist", items = items)
+            
+            cur.execute("insert into users_to_basestations (user_id, basestation_id) VALUES (%s, %s)", (user_id, basestation_id))
 
-        # maybe add success feedback
-        return redirect(url_for("basestation", basestation_id=basestation_id))
+        data = pd.read_sql("select username from users where id =ANY(select user_id from users_to_basestations where basestation_id = %s and owner = False)", conn, params=[basestation_id])
+        items = data.to_dict("records")
+        print(items, current_user.id, flush=True)
 
-    return render_template("basestationadduserview.html")
+        return render_template("basestationadduserview.html", error=f"User: {user} added to basestation with id: {basestation_id}", items = items)
+
+    return render_template("basestationadduserview.html", items = items)
+
+
+@webserver.route("/basestation/<int:basestation_id>/removeuser", methods=['GET', 'POST'])
+def basestation_removeuser(basestation_id):
+    if not user_has_access(basestation_id, True):
+        return "Unauthorized"
+
+    data = pd.read_sql("select username from users where id =ANY(select user_id from users_to_basestations where basestation_id = %s and owner = False)", conn, params=[basestation_id])
+    items = data.to_dict("records")
+    print(items, current_user.id, flush=True)
+
+    if request.method == 'POST':
+        user = request.form.get("user")
+        with conn.cursor() as cur:
+            cur.execute("select id from users where username = %s", (user, ))
+            row = cur.fetchone()
+            user_id = row[0] if row else None
+            if not user_id:
+                return render_template("basestationremoveuserview.html", error="User does not exist", items = items)
+            
+            if current_user.id == user_id:
+                return render_template("basestationremoveuserview.html", error="Cant remove own user", items = items)
+            
+            cur.execute("delete from users_to_basestations where user_id = %s", (user_id, ))
+            
+        data = pd.read_sql("select username from users where id =ANY(select user_id from users_to_basestations where basestation_id = %s and owner = False)", conn, params=[basestation_id])
+        items = data.to_dict("records")
+        print(items, current_user.id, flush=True)
+
+        return render_template("basestationremoveuserview.html", error=f"User: {user} removed from basestation with id: {basestation_id}", items = items)
+
+    return render_template("basestationremoveuserview.html", items = items)
+
 
 @webserver.route("/basestation/<int:basestation_id>/cameras")
 def basestation_cameras(basestation_id):  

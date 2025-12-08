@@ -10,7 +10,7 @@
     <div class="error">{{ error }}</div>
     {% endif %}
     <div class="header">
-        <h1>Add Users to Basestation</h1>
+        <h1>Remove Users from Basestation</h1>
         <div class="user-info">
             <span class="username">{{ username }}</span>
             <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
@@ -20,7 +20,7 @@
     <form method="POST">
         <label for="username">Username:</label>
         <input type="text" name="user" id="user">
-        <button type="submit">Add User to Basestation</button>
+        <button type="submit">Remove User from Basestation</button>
     </form>
     
     <ul class="user-list">

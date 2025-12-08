@@ -1,8 +1,8 @@
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
-create table if not exists basestations (id serial primary key, name text unique, password_salt uuid, password text);
+create table if not exists basestations (id serial primary key, name text unique, password_salt uuid, password text, connection_id uuid DEFAULT gen_random_uuid(), active boolean DEFAULT TRUE);
 create table if not exists users (id serial primary key, username text unique, password_salt uuid, password text);
 -- create table if not exists groups (id serial primary key, name text unique);
-create table if not exists users_to_basestations (user_id integer references users(id) on delete cascade, basestation_id integer references basestations(id) on delete cascade, owner boolean);
+create table if not exists users_to_basestations (user_id integer references users(id) on delete cascade, basestation_id integer references basestations(id) on delete cascade, owner boolean DEFAULT FALSE);
 -- create table if not exists basestations_to_groups (basestation_id integer references basestations(id) on delete cascade, group_id integer references groups(id) on delete cascade);
 CREATE OR REPLACE FUNCTION public.verify_user(in_username text, in_password text)          
   RETURNS boolean                                                                           
