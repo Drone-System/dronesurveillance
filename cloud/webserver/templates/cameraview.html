@@ -86,7 +86,7 @@
     <script>
         // Auto-refresh when streams change
         setInterval(function() {
-            fetch('/api/streams')
+            fetch('/api/streams/{{basestation_id}}')
                 .then(response => response.json())
                 .then(data => {
                     if (data.length !== {{ streams|length }}) {

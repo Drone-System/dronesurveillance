@@ -79,6 +79,7 @@ class WebRTCProducer:
         await self.__on_start_stream()
         response = await self.stub.Stream(
             ServerBaseStation_pb2.StreamOffer(
+                basestation_id=self.basestation_id,
                 stream_id=self.stream_id, 
                 offer=ServerBaseStation_pb2.StreamDesc(
                     type=self.pc.localDescription.type,

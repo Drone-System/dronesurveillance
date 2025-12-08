@@ -36,7 +36,7 @@ class DatabaseManager:
             return IpCamera(0)
 
     def GetCameraNameById(self, cam_id: int):
-        return "Some Name"
+        return "SomeName"
     
     def pollDrones(self):
         return [(1, )]
@@ -45,4 +45,4 @@ class DatabaseManager:
         return DjiTelloDrone
 
     def getDroneNameById(self, drone_id):
-        return "My Drone"
+        return "MyDrone"
