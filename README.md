@@ -21,7 +21,7 @@ simulated security incident scenarios.
 
 * [x] Adjust database to not have groups
 * [x] Connect cloud webserver to proper database and ajust permissions
-* [ ] Make basestation add and basestation user add and remove work
+* [x] Make basestation add and basestation user add and remove work
 * [x] Develop Proxy server with grpc server
 * [x] Show cameras in browser
 * [ ] Filter cameras by basestation with permissions
