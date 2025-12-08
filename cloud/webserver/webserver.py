@@ -266,6 +266,7 @@ def add_basestation():
         if count_bs == 0:
             return render_template("addbasestationview.html", 
                 error="No basestation with specified id. Please first connect a basestation.")
+        
         data = pd.read_sql("select count(*) from users_to_basestations where basestation_id=%s::integer AND owner=TRUE", conn, params=[id,])
         count_bs = data.to_dict()["count"][0]
         if count_bs != 0:
@@ -274,13 +275,16 @@ def add_basestation():
 
         print(id, password, flush=True)
         result = pd.read_sql("select verify_basestation(%s, %s::text)", conn, params=[id, password])
-
         print("RESULT", result, flush=True)
 
+        data = result.to_dict()['verify_basestation'][0]
 
-
-
-
+        if not data:
+            return render_template("addbasestationview.html", 
+            error="Basestation password incorrect.")
+        
+        with conn.cursor() as cur:
+            cur.execute('insert into users_to_basestations (user_id, basestation_id, owner) VALUES (%s, %s, True)', (current_user.id, id))
 
 
         # check if basestation id exists
