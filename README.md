@@ -24,11 +24,13 @@ simulated security incident scenarios.
 * [x] Make basestation add and basestation user add and remove work
 * [x] Develop Proxy server with grpc server
 * [x] Show cameras in browser
-* [ ] Filter cameras by basestation with permissions
+* [x] Filter cameras by basestation with permissions
 * [ ] Make Grpc use secure connection
 * [x] Develop Drone manager
 * [ ] Integrate basestation webserver with core and database
 * [x] Integrate drone manager with camera manager
 * [ ] Add env to cloud
 * [ ] Deploy cloud part with IaC into aws
+* [ ] Apply yolo on incoming video streams from camera in cloud
+* [ ] Alert user when "threat" is detected by yolo
 * [ ] CELEBRATE
