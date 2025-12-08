@@ -345,7 +345,7 @@ def basestation_cameras(basestation_id):
     if not user_has_access(basestation_id):
         return "Unauthorized"
     streams = get_active_streams(basestation_id)
-    return render_template("cameraview.html", streams=streams)
+    return render_template("cameraview.html", streams=streams, basestation_id=basestation_id)
 
 
 @webserver.route('/request', methods = ['POST'])
@@ -411,10 +411,10 @@ def get_active_streams(basestation_id):
         
         # Only include streams with active heartbeat
         if heartbeat:
-            fields = channel_name.split("*")
+            fields = channel_name.split("_")
             display_name = fields[2]
             b_id = fields[0]
-            if b_id == basestation_id:
+            if int(b_id) == basestation_id:
                 streams.append({
                     'channel': channel_name,
                     'display_name': display_name,
@@ -425,11 +425,13 @@ def get_active_streams(basestation_id):
     
     return streams
 
-# @webserver.route('/api/streams')
-# def api_streams():
-#     """API endpoint to get list of active streams"""
-#     streams = get_active_streams()
-#     return jsonify(streams)
+@webserver.route('/api/streams/<int:basestation_id>')
+def api_streams(basestation_id):
+    """API endpoint to get list of active streams"""
+    if not user_has_access(basestation_id):
+        return "Unauthorized"
+    streams = get_active_streams(basestation_id)
+    return jsonify(streams)
 
 def generate_frames(channel_name):
     """
@@ -468,7 +470,7 @@ def generate_frames(channel_name):
 @webserver.route('/video_feed/<channel_name>')
 def video_feed(channel_name):
     """Dynamic video streaming route for any channel"""
-    if not user_has_access(channel_name.split("*")[0]):
+    if not user_has_access(channel_name.split("_")[0]):
         return "Unauthorized"
     return Response(generate_frames(channel_name),
                     mimetype='multipart/x-mixed-replace; boundary=frame')

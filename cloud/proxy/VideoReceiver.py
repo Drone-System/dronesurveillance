@@ -10,7 +10,7 @@ class VideoReceiver:
     def __init__(self, basestation_id, stream_id, name):
         self.track = None
         self.running = True
-        self.stream_id = f"{basestation_id}*{stream_id}*{name}"
+        self.stream_id = f"{basestation_id}_{stream_id}_{name}"
         # self.name = name
         try:
             self.r = redis.Redis(host='red', port=6379, db=0, socket_connect_timeout=5)
