@@ -120,7 +120,7 @@ message AvailableDronesResponse {
 }
 
 message DroneInfo {
-    uint32 id = 1;
+    string id = 1;
     string name = 2;
 }
 

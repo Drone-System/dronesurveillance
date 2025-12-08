@@ -312,7 +312,7 @@ async def droneview(basestation_id):
     # check if user is allowed to request drones from that base station
     # data = pd.read_sql("select id, name from basestations where id = ")
     
-    drones = await stub.RequestAvailableDrones(ServerBaseStation_pb2.AvailableDroneRequest(basestation_id=basestation_id))
+    drones = await stub.RequestAvailableDrones(ServerBaseStation_pb2.AvailableDroneRequest(basestation_id=int(basestation_id)))
 
     if drones.info:
         return render_template("droneview.html", basestation_id=basestation_id, drones = drones.info)
@@ -364,7 +364,7 @@ async def request_stream():
         print("Request Unauthorized", flush=True)
         return jsonify({})
 
-    response = await stub.RequestDroneStream(ServerBaseStation_pb2.DroneStreamRequest(basestation_id= str(basestation_id) ,drone_id = str(drone_id)))
+    response = await stub.RequestDroneStream(ServerBaseStation_pb2.DroneStreamRequest(basestation_id= int(basestation_id) ,drone_id = str(drone_id)))
     reply = {"stream_id": response.stream_id, "offer": {"type": response.offer.type, "sdp": response.offer.sdp}}
     return jsonify(reply)
 
@@ -380,7 +380,7 @@ async def answer_stream():
         print("Answer Unauthorized", flush=True)
         return jsonify({})
 
-    answer = ServerBaseStation_pb2.StreamAnswer(basestation_id=data['basestation_id'],
+    answer = ServerBaseStation_pb2.StreamAnswer(basestation_id=int(data['basestation_id']),
                                                 stream_id=data['stream_id'], 
                                                 answer= ServerBaseStation_pb2.StreamDesc(type = data['answer']['type'],
                                                                                           sdp = data['answer']['sdp']))
