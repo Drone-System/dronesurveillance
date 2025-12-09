@@ -1,7 +1,7 @@
 services:
   webserver:
     build: webserver/
-    container_name: server
+    container_name: bs_server
     ports:
       - 5000:5000
     depends_on:
