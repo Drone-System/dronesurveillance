@@ -22,12 +22,12 @@ async def main():
     name = CONFIG.get("BASESTATION_NAME") #This should be written in a configuaration file
     password = CONFIG.get("BASESTATION_PASSWORD")
     address = f"{CONFIG.get('GRPC_REMOTE_IP')}:{CONFIG.get('GRPC_REMOTE_PORT')}"
-    while identifier == -1:
-        sleep(1)
-        async with grpc.aio.insecure_channel(address) as channel:
-            stub = ServerBaseStation_pb2_grpc.CloudStub(channel)
-            response =  await stub.Connect(ServerBaseStation_pb2.ConnectToCloudRequest(name=name, password=password))
-            identifier = response.id
+    # while identifier == -1:
+    #     sleep(1)
+    #     async with grpc.aio.insecure_channel(address) as channel:
+    #         stub = ServerBaseStation_pb2_grpc.CloudStub(channel)
+    #         response =  await stub.Connect(ServerBaseStation_pb2.ConnectToCloudRequest(name=name, password=password))
+    #         identifier = response.ids
 
     print("Got Id:", identifier)
     camManager = CameraManager(identifier, name, dbMan)

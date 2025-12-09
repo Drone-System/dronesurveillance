@@ -42,7 +42,7 @@ UNIT = 50
 class DjiTelloDrone(IDrone):
     
 
-    def __init__(self, ip="0.0.0.0"): #, ip, port, video_port):
+    def __init__(self): #, ip, port, video_port):
         # self.ip = ip
         # self.port = port
         # self.video_port = video_port
