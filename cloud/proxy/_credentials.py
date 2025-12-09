@@ -7,6 +7,6 @@ def _load_credential_from_file(filepath):
         return f.read()
 
 
-# SERVER_CERTIFICATE = _load_credential_from_file("../credentials/server.crt")
-# SERVER_CERTIFICATE_KEY = _load_credential_from_file("../credentials/server.key")
+SERVER_CERTIFICATE = _load_credential_from_file("../credentials/server.crt")
+SERVER_CERTIFICATE_KEY = _load_credential_from_file("../credentials/server.key")
 ROOT_CERTIFICATE = _load_credential_from_file("../credentials/ca.crt")
