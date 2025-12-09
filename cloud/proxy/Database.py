@@ -78,7 +78,7 @@ class Database:
         # return number of basestations deleted
         to_delete = []
         for basestation, time in self.times.items():
-            if datetime.now() >= time + timedelta(minutes=5):
+            if datetime.now() >= time + timedelta(minutes=1):
                 to_delete.append(basestation)
         
         res = 0
