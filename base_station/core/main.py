@@ -11,6 +11,15 @@ from time import sleep
 import grpc
 import _credentials
 
+async def stayalive(address, b_id, creds):
+
+    async with grpc.aio.secure_channel(address, creds) as channel:
+        while True:
+            stub = ServerBaseStation_pb2_grpc.CloudStub(channel)
+            response =  await stub.Ping(ServerBaseStation_pb2.PingRequest(id=b_id))
+            await asyncio.sleep(30)
+
+
 async def main():
     creds = grpc.ssl_channel_credentials(_credentials.ROOT_CERTIFICATE)
     dbMan = DatabaseManager(
@@ -32,7 +41,7 @@ async def main():
     camManager = CameraManager(identifier, name, dbMan)
     droneManager = DroneManager(identifier, name, dbMan)
     print("Started")
-    await asyncio.gather(camManager.run(), droneManager.run())
+    await asyncio.gather(camManager.run(), droneManager.run(), stayalive(address, identifier, creds))
 
 
     

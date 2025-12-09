@@ -73,7 +73,7 @@ class DroneWebRTCProducer:
         address = f"{CONFIG.get('GRPC_REMOTE_IP')}:{CONFIG.get('GRPC_REMOTE_PORT')}"
         self.channel = channel = grpc.aio.insecure_channel(address)
         self.stub = ServerBaseStation_pb2_grpc.DroneWebRtcStub(channel)
-        response = await self.stub.Connect(ServerBaseStation_pb2.ConnectRequest(basestation_id=self.basestation_id, name= "test"))
+        response = await self.stub.Connect(ServerBaseStation_pb2.ConnectRequest(basestation_id=self.basestation_id, name=self.stream_name))
         print("connected")
         self.sid = response.stream_id
         response = False
