@@ -9,7 +9,7 @@ import sys
 import subprocess
 from datetime import datetime
 
-r = redis.Redis(host="red", port=6379, db=0, socket_connect_timeout=5)
+r = redis.Redis(host="redisserver", port=6379, db=0, socket_connect_timeout=5)
 
 processes = []
 

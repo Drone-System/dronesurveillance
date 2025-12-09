@@ -48,7 +48,7 @@ for attempt in range(max_retries):
 #--------------------- Redis setup --------------------
 
 try:
-    r = redis.Redis(host='red', port=6379, db=0, socket_connect_timeout=5)
+    r = redis.Redis(host='redisserver', port=6379, db=0, socket_connect_timeout=5)
     r.ping()
     print("Connected to Redis successfully!")
 except redis.ConnectionError as e:

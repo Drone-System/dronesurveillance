@@ -13,7 +13,7 @@ class VideoReceiver:
         self.stream_id = f"{basestation_id}_{stream_id}_{name}"
         # self.name = name
         try:
-            self.r = redis.Redis(host='red', port=6379, db=0, socket_connect_timeout=5)
+            self.r = redis.Redis(host='redisserver', port=6379, db=0, socket_connect_timeout=5)
             self.r.ping()  # Test connection
             print("Connected to Redis successfully!")
         except redis.ConnectionError as e:

@@ -4,13 +4,13 @@ services:
     build: videostorage/
     container_name: video_storage
     depends_on:
-      red:
+      redisserver:
         condition: service_healthy
         restart: true
     volumes:
       - shared_videos:/app/videos
 
-  red:
+  redisserver:
     image: redis:6.2-alpine
     restart: always
     ports:
@@ -32,6 +32,9 @@ services:
       db:
         condition: service_healthy
         restart: true
+      redisserver:
+        condition: service_healthy
+        restart: true
 
   webserver:
     build: webserver/
@@ -43,7 +46,7 @@ services:
       db:
         condition: service_healthy
         restart: true
-      red:
+      redisserver:
         condition: service_healthy
         restart: true
     volumes:
