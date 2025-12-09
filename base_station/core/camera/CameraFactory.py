@@ -19,5 +19,5 @@ class CameraFactory:
         elif camera_type == "usb_camera":
             device_id = config.get('device_id',''),
             
-            return IpCamera(device_id[0]) if device_id else None
+            return IpCamera(int(device_id[0])) if device_id else None
     

@@ -11,6 +11,4 @@ COPY . .
 
 RUN mkdir -p /app/videos
 
-RUN mv file_example_MP4_480_1_5MG.mp4 videos/file_example_MP4_480_1_5MG.mp4
-
 CMD ["python", "VideoStore.py"]
