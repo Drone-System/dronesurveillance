@@ -1,7 +1,7 @@
 # app.py - Flask web server
 from flask import Flask, render_template, request, jsonify, redirect, url_for
-import psycopg2
-from psycopg2.extras import RealDictCursor
+import psycopg
+from psycopg.rows import dict_row
 import json
 from datetime import datetime
 
@@ -12,7 +12,7 @@ DB_CONFIG = {
     'dbname': 'db',
     'user': 'postgres',
     'password': 'mypass',
-    'host': 'localhost',
+    'host': 'db',
     'port': 5432
 }
 
@@ -56,7 +56,7 @@ DRONE_TYPES = {
 }
 
 def get_db_connection():
-    return psycopg2.connect(**DB_CONFIG)
+    return psycopg.connect(**DB_CONFIG)
 
 def init_db():
     """Initialize database with cameras and drones tables"""
@@ -94,7 +94,7 @@ def init_db():
 @app.route('/')
 def index():
     conn = get_db_connection()
-    cur = conn.cursor(cursor_factory=RealDictCursor)
+    cur = conn.cursor(row_factory=dict_row)
     
     # Get cameras
     cur.execute('SELECT * FROM cameras ORDER BY created_at DESC')
