@@ -27,11 +27,17 @@ async def main(signal):
         Cloud(database), server
     )
 
-    key = _credentials.SERVER_CERTIFICATE_KEY
-    cert = _credentials.SERVER_CERTIFICATE
-    creds = grpc.ssl_server_credentials([(key, cert)])
     listen_addr = "[::]:50051"
-    server.add_secure_port(listen_addr, creds)
+
+    # Basestation channel:
+    bs_key = _credentials.BS_SERVER_CERTIFICATE_KEY
+    bs_cert = _credentials.BS_SERVER_CERTIFICATE
+    # Webserver channel:
+    ws_key = _credentials.WS_SERVER_CERTIFICATE_KEY
+    ws_cert = _credentials.WS_SERVER_CERTIFICATE
+    ws_creds = grpc.ssl_server_credentials([(ws_key, ws_cert), (bs_key, bs_cert)])
+    server.add_secure_port(listen_addr, ws_creds)
+
     print("Starting server on ", listen_addr, flush=True)
     await server.start()
 
