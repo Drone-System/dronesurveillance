@@ -1,5 +1,15 @@
 services:
 
+  videorecorder:
+    build: videostorage/
+    container_name: video_storage
+    depends_on:
+      red:
+        condition: service_healthy
+        restart: true
+    volumes:
+      - shared_videos:/app/videos
+
   red:
     image: redis:6.2-alpine
     restart: always
@@ -37,6 +47,8 @@ services:
       red:
         condition: service_healthy
         restart: true
+    volumes:
+      - shared_videos:/app/videos:ro
 
   db:
     image: postgres:17
@@ -57,3 +69,5 @@ services:
 
 volumes:
   db:
+  shared_videos:
+    driver: local

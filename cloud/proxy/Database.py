@@ -62,7 +62,7 @@ class Database:
     def deactivateBasestation(self, basestation_id: int) -> bool:
 
         with self.conn.cursor() as cur:
-            cur.execute("UPDATE basestations SET active = false where basestation_id =%s", (basestation_id, ))
+            cur.execute("UPDATE basestations SET active = false where id =%s", (basestation_id, ))
 
         return True
 

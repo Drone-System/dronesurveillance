@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, request, url_for, flash, session, make_response, jsonify, Response
+from flask import Flask, render_template, redirect, request, url_for, flash, session, make_response, jsonify, Response, send_from_directory
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 import pandas as pd
 import psycopg
@@ -14,16 +14,16 @@ import redis
 import re
 import base64
 import _credentials
+from datetime import datetime
 
 # -------------------- Database --------------------
 # Retry connection logic for Docker startup
 max_retries = 5
 retry_delay = 2
 
-creds = grpc.ssl_channel_credentials(_credentials.ROOT_CERTIFICATE)
+VIDEO_DIR = "/app/videos"
 
-channel = grpc.aio.secure_channel('localhost:50051', creds)
-stub = ServerBaseStation_pb2_grpc.WebserverDroneCommuncationDetailsStub(channel)
+creds = grpc.ssl_channel_credentials(_credentials.ROOT_CERTIFICATE)
 
 for attempt in range(max_retries):
     try:
@@ -317,7 +317,7 @@ def basestation(basestation_id):
 async def droneview(basestation_id):
     if not user_has_access(basestation_id):
         return "Unauthorized"
-    channel = grpc.aio.insecure_channel('proxy_server:50051')
+    channel = grpc.aio.secure_channel('proxy_server:50051', creds)
     stub = ServerBaseStation_pb2_grpc.WebserverDroneCommuncationDetailsStub(channel)
     # check if user is allowed to request drones from that base station
     # data = pd.read_sql("select id, name from basestations where id = ")
@@ -407,7 +407,7 @@ def basestation_cameras(basestation_id):
 
 @webserver.route('/request', methods = ['POST'])
 async def request_stream():
-    channel = grpc.aio.insecure_channel('host.docker.internal:50051')
+    channel = grpc.aio.secure_channel('proxy_server:50051', creds)
     stub = ServerBaseStation_pb2_grpc.WebserverDroneCommuncationDetailsStub(channel)
 
     print("request received", flush=True)
@@ -428,7 +428,7 @@ async def request_stream():
 
 @webserver.route('/answer', methods = ['POST'])
 async def answer_stream():
-    channel = grpc.aio.insecure_channel('host.docker.internal:50051')
+    channel = grpc.aio.secure_channel('proxy_server:50051', creds)
     stub = ServerBaseStation_pb2_grpc.WebserverDroneCommuncationDetailsStub(channel)
 
     data = request.get_json()
@@ -531,6 +531,57 @@ def video_feed(channel_name):
         return "Unauthorized"
     return Response(generate_frames(channel_name),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
+
+VIDEO_DIR = '/app/videos'
+
+@webserver.route('/basestation/<int:basestation_id>/recordings')
+def videolist(basestation_id):
+    if not user_has_access(basestation_id):
+        return 'Unauthorized'
+    videos = get_video_list(basestation_id)
+    return render_template('recordings.html', videos=videos)
+
+@webserver.route('/api/videos')
+def api_videos():
+    """API endpoint to get list of videos"""
+    videos = get_video_list()
+    return jsonify(videos)
+
+@webserver.route('/videos/<filename>')
+def serve_video(filename):
+    """Serve video files"""
+    return send_from_directory(VIDEO_DIR, filename)
+
+def get_video_list(basestation_id):
+    """Get list of all .mp4 files with metadata"""
+    videos = []
+    
+    if not os.path.exists(VIDEO_DIR):
+        return videos
+    
+    for filename in os.listdir(VIDEO_DIR):
+        if filename.endswith('.mp4') and filename.startswith(str(basestation_id)):
+            filepath = os.path.join(VIDEO_DIR, filename)
+            stat = os.stat(filepath)
+            
+            videos.append({
+                'filename': filename,
+                'size': format_size(stat.st_size),
+                'created': datetime.fromtimestamp(stat.st_mtime).strftime('%Y-%m-%d %H:%M:%S'),
+                'timestamp': stat.st_mtime
+            })
+    
+    # Sort by timestamp, newest first
+    videos.sort(key=lambda x: x['timestamp'], reverse=True)
+    return videos
+
+def format_size(bytes):
+    """Format file size in human-readable format"""
+    for unit in ['B', 'KB', 'MB', 'GB']:
+        if bytes < 1024.0:
+            return f"{bytes:.1f} {unit}"
+        bytes /= 1024.0
+    return f"{bytes:.1f} TB"
 
 # -------------------- Error handlers --------------------
 @webserver.errorhandler(404)

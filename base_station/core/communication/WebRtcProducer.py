@@ -8,6 +8,9 @@ import ServerBaseStation_pb2_grpc
 import uuid
 import asyncio
 from camera.IpCamera import IpCamera # REMOVE LATER WHEN CHANGING DEFAULT SOURCE
+import _credentials
+
+creds = grpc.ssl_channel_credentials(_credentials.ROOT_CERTIFICATE)
 
 class WebRTCProducer:
     def __init__(self, basestation_id, source, stream_name="Unnamed Camera"):
@@ -60,7 +63,8 @@ class WebRTCProducer:
         
         # await self.sio.connect(self.server_url)
         address = f"{CONFIG.get('GRPC_REMOTE_IP')}:{CONFIG.get('GRPC_REMOTE_PORT')}"
-        self.channel = channel = grpc.aio.insecure_channel(address)
+
+        self.channel = channel = grpc.aio.secure_channel(address, creds)
         print("some")
         self.stub = ServerBaseStation_pb2_grpc.WebRtcStub(channel)
         print("some")

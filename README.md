@@ -25,7 +25,7 @@ simulated security incident scenarios.
 * [x] Develop Proxy server with grpc server
 * [x] Show cameras in browser
 * [x] Filter cameras by basestation with permissions
-* [ ] Make Grpc use secure connection
+* [x] Make Grpc use secure connection
 * [x] Develop Drone manager
 * [ ] Integrate basestation webserver with core and database
 * [x] Integrate drone manager with camera manager

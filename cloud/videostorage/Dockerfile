@@ -1,0 +1,16 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y ffmpeg libx264-dev && rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . . 
+
+RUN mkdir -p /app/videos
+
+RUN mv file_example_MP4_480_1_5MG.mp4 videos/file_example_MP4_480_1_5MG.mp4
+
+CMD ["python", "VideoStore.py"]
