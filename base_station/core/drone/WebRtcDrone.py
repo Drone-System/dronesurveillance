@@ -8,6 +8,9 @@ import ServerBaseStation_pb2_grpc
 import uuid
 import asyncio
 from camera.IpCamera import IpCamera # REMOVE LATER WHEN CHANGING DEFAULT SOURCE
+import _credentials
+
+creds = grpc.ssl_channel_credentials(_credentials.ROOT_CERTIFICATE)
 
 class DroneWebRTCProducer:
     def __init__(self, basestation_id, source, stream_name="Unnamed Drone"):
@@ -71,7 +74,7 @@ class DroneWebRTCProducer:
         
         # await self.sio.connect(self.server_url)
         address = f"{CONFIG.get('GRPC_REMOTE_IP')}:{CONFIG.get('GRPC_REMOTE_PORT')}"
-        self.channel = channel = grpc.aio.insecure_channel(address)
+        self.channel = channel = grpc.aio.secure_channel(address, creds)
         self.stub = ServerBaseStation_pb2_grpc.DroneWebRtcStub(channel)
         response = await self.stub.Connect(ServerBaseStation_pb2.ConnectRequest(basestation_id=self.basestation_id, name=self.stream_name))
         print("connected")
