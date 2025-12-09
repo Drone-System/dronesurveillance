@@ -22,6 +22,8 @@ server_key = os.path.join(proxy_out_dir, "server.key")
 server_csr = os.path.join(proxy_out_dir, "server.csr")
 server_crt = os.path.join(proxy_out_dir, "server.crt")
 
+servername = input("Server host name: ")
+
 # --- COMMANDS ---
 cmds = [
     ["openssl", "genrsa", "-out", ca_key, "4096"],
@@ -30,7 +32,7 @@ cmds = [
 
     ["openssl", "genrsa", "-out", server_key, "4096"],
     ["openssl", "req", "-new", "-key", server_key, "-out", server_csr,
-     "-subj", "/CN=localhost"],
+     "-subj", f"/CN={servername}"],
 
     ["openssl", "x509", "-req", "-in", server_csr, "-CA", ca_crt,
      "-CAkey", ca_key, "-CAcreateserial",
