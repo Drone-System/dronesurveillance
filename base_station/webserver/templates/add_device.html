@@ -1,27 +1,140 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Add {{ device_type }}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>{{ title }}</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        h1 { color: #333; margin-bottom: 10px; }
+        .subtitle { color: #666; margin-bottom: 30px; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; }
+        input[type="text"], input[type="number"], input[type="password"], select {
+            width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;
+        }
+        input[type="checkbox"] { margin-right: 5px; }
+        .btn { padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; }
+        .btn:hover { background: #0056b3; }
+        .btn-secondary { background: #6c757d; margin-right: 10px; text-decoration: none; display: inline-block; }
+        .btn-secondary:hover { background: #545b62; }
+        .btn-success { background: #28a745; }
+        .btn-success:hover { background: #218838; }
+        #dynamic-fields { margin-top: 20px; padding-top: 20px; border-top: 2px solid #e9ecef; }
+        .required::after { content: " *"; color: red; }
+        .actions { margin-top: 30px; }
+    </style>
 </head>
 <body>
-    <h1>Add {{ device_type }}</h1>
-    <form method="POST">
-        <label for="ip">IP:</label>
-        <select name="ip" id="ip" required>
-            {% for ip in ips %}
-                <option value="{{ ip }}">{{ ip }}</option>
-            {% endfor %}
-        </select>
-        <br><br>
-        <label for="protocol">Video Protocol:</label>
-        <select name="protocol" id="protocol" required>
-            {% for protocol in protocols %}
-                <option value="{{ protocol }}">{{ protocol }}</option>
-            {% endfor %}
-        </select>
-        <br><br>
-        <button type="submit">Add {{ device_type }}</button>
-    </form>
+    <div class="container">
+        <h1>{{ title }}</h1>
+        <p class="subtitle">Configure your new {{ device_type }}</p>
+        
+        <form id="device-form">
+            <div class="form-group">
+                <label for="name" class="required">{{ device_type|title }} Name</label>
+                <input type="text" id="name" name="name" required placeholder="Enter a descriptive name">
+            </div>
+            
+            <div class="form-group">
+                <label for="type" class="required">{{ device_type|title }} Type</label>
+                <select id="type" name="type" required>
+                    <option value="">-- Select {{ device_type|title }} Type --</option>
+                    {% for key, value in types.items() %}
+                    <option value="{{ key }}">{{ value.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div id="dynamic-fields"></div>
+            
+            <div class="actions">
+                <a href="/" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn {% if device_type == 'drone' %}btn-success{% endif %}">
+                    Add {{ device_type|title }}
+                </button>
+            </div>
+        </form>
+    </div>
+    
+    <script>
+        const deviceType = "{{ device_type }}";
+        const typeSelect = document.getElementById('type');
+        const dynamicFields = document.getElementById('dynamic-fields');
+        const form = document.getElementById('device-form');
+        
+        typeSelect.addEventListener('change', function() {
+            const type = this.value;
+            if (!type) {
+                dynamicFields.innerHTML = '';
+                return;
+            }
+            
+            fetch(`/api/${deviceType}_fields/${type}`)
+                .then(response => response.json())
+                .then(data => {
+                    let html = ``;
+                    if (data.fields.length !== 0) {
+                        html = `<h3 style="margin-bottom: 15px;">${deviceType === 'camera' ? 'Camera' : 'Drone'} Configuration</h3>`;
+                    }
+                    data.fields.forEach(field => {
+                        html += `<div class="form-group">`;
+                        html += `<label for="${field.name}" ${field.required ? 'class="required"' : ''}>${field.label}</label>`;
+                        
+                        if (field.type === 'checkbox') {
+                            html += `<input type="checkbox" id="${field.name}" name="${field.name}">`;
+                        } else {
+                            html += `<input type="${field.type}" id="${field.name}" name="${field.name}" ${field.required ? 'required' : ''}>`;
+                        }
+                        
+                        html += `</div>`;
+                    });
+                    
+                    dynamicFields.innerHTML = html;
+                })
+                .catch(err => {
+                    alert(`Error loading ${deviceType} fields`);
+                    console.error(err);
+                });
+        });
+        
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(form);
+            const config = {};
+            
+            // Get dynamic fields
+            const typeFields = dynamicFields.querySelectorAll('input');
+            typeFields.forEach(field => {
+                if (field.type === 'checkbox') {
+                    config[field.name] = field.checked;
+                } else {
+                    config[field.name] = field.value;
+                }
+            });
+            
+            const data = {
+                name: formData.get('name'),
+                [`${deviceType}_type`]: formData.get('type'),
+                config: config
+            };
+            
+            fetch(`/api/${deviceType}s`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                window.location.href = '/';
+            })
+            .catch(err => {
+                alert(`Error adding ${deviceType}`);
+                console.error(err);
+            });
+        });
+    </script>
 </body>
 </html>

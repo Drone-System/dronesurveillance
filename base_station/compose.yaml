@@ -1,13 +1,13 @@
 services:
-  # webserver:
-  #   build: webserver/
-  #   container_name: server
-  #   ports:
-  #     - 5000:5000
-  #   depends_on:
-  #     db:
-  #       condition: service_healthy
-  #       restart: true
+  webserver:
+    build: webserver/
+    container_name: server
+    ports:
+      - 5000:5000
+    depends_on:
+      db:
+        condition: service_healthy
+        restart: true
 
   # core:
   #   build: core/

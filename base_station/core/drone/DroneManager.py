@@ -71,7 +71,7 @@ class DroneManager:
     def __registerDrone(self, drone_id: int, event_loop):
         drone = self.dbMan.getDroneById(drone_id) # somewhere inside this should call protocol transformer
         # camera = IpCamera("")
-        drone_name = self.dbMan.getDroneNameById(drone)
+        drone_name = self.dbMan.getDroneNameById(drone_id)
         print("Opened cam")
         producer = DroneWebRTCProducer(basestation_id=self.identifier, source=drone, stream_name=drone_name)
         # self.cameras[cam] = multiprocessing.Process() This should span a process where the webrtc producer runs

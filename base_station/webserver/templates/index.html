@@ -1,12 +1,146 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Add Device</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Camera & Drone Management</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px; }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .header { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 30px; }
+        h1 { color: #333; margin-bottom: 20px; }
+        .button-group { display: flex; gap: 10px; }
+        .btn { padding: 10px 20px; background: #007bff; color: white; text-decoration: none; border-radius: 4px; border: none; cursor: pointer; display: inline-block; }
+        .btn:hover { background: #0056b3; }
+        .btn-success { background: #28a745; }
+        .btn-success:hover { background: #218838; }
+        .btn-danger { background: #dc3545; }
+        .btn-danger:hover { background: #c82333; }
+        
+        .section { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 30px; }
+        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #e9ecef; }
+        h2 { color: #333; }
+        .count-badge { background: #007bff; color: white; padding: 4px 12px; border-radius: 12px; font-size: 0.9em; margin-left: 10px; }
+        
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background: #f8f9fa; font-weight: bold; }
+        .type-badge { display: inline-block; padding: 4px 8px; background: #e9ecef; border-radius: 4px; font-size: 0.9em; }
+        .camera-badge { background: #d1ecf1; color: #0c5460; }
+        .drone-badge { background: #d4edda; color: #155724; }
+        .no-items { text-align: center; padding: 40px; color: #666; }
+        pre { font-size: 0.9em; background: #f8f9fa; padding: 8px; border-radius: 4px; max-width: 400px; overflow-x: auto; }
+    </style>
 </head>
 <body>
-    <h1>Select Device Type</h1>
-    <a href="{{ url_for('add_camera') }}"><button>Add Camera</button></a>
-    <a href="{{ url_for('add_drone') }}"><button>Add Drone</button></a>
+    <div class="container">
+        <div class="header">
+            <h1>Camera & Drone Management System</h1>
+            <div class="button-group">
+                <a href="/add_camera" class="btn">Add New Camera</a>
+                <a href="/add_drone" class="btn btn-success">Add New Drone</a>
+            </div>
+        </div>
+        
+        <!-- Cameras Section -->
+        <div class="section">
+            <div class="section-header">
+                <h2>
+                    Cameras
+                    <span class="count-badge">{{ cameras|length }}</span>
+                </h2>
+            </div>
+            
+            {% if cameras %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>Configuration</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for camera in cameras %}
+                    <tr>
+                        <td>{{ camera.id }}</td>
+                        <td><strong>{{ camera.name }}</strong></td>
+                        <td><span class="type-badge camera-badge">{{ camera_types[camera.camera_type].name }}</span></td>
+                        <td><pre>{{ camera.config | tojson }}</pre></td>
+                        <td>{{ camera.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                        <td>
+                            <button class="btn btn-danger" onclick="deleteDevice('camera', {{ camera.id }})">Delete</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="no-items">
+                <p>No cameras registered yet. Click "Add New Camera" to get started.</p>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Drones Section -->
+        <div class="section">
+            <div class="section-header">
+                <h2>
+                    Drones
+                    <span class="count-badge">{{ drones|length }}</span>
+                </h2>
+            </div>
+            
+            {% if drones %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>Configuration</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for drone in drones %}
+                    <tr>
+                        <td>{{ drone.id }}</td>
+                        <td><strong>{{ drone.name }}</strong></td>
+                        <td><span class="type-badge drone-badge">{{ drone_types[drone.drone_type].name }}</span></td>
+                        <td><pre>{{ drone.config | tojson }}</pre></td>
+                        <td>{{ drone.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                        <td>
+                            <button class="btn btn-danger" onclick="deleteDevice('drone', {{ drone.id }})">Delete</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="no-items">
+                <p>No drones registered yet. Click "Add New Drone" to get started.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <script>
+        function deleteDevice(type, id) {
+            const deviceName = type === 'camera' ? 'camera' : 'drone';
+            if (confirm(`Are you sure you want to delete this ${deviceName}?`)) {
+                fetch(`/api/${type}s/${id}`, { method: 'DELETE' })
+                    .then(response => response.json())
+                    .then(data => {
+                        alert(data.message);
+                        location.reload();
+                    })
+                    .catch(err => alert(`Error deleting ${deviceName}`));
+            }
+        }
+    </script>
 </body>
 </html>

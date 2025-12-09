@@ -10,7 +10,7 @@ import asyncio
 from camera.IpCamera import IpCamera # REMOVE LATER WHEN CHANGING DEFAULT SOURCE
 
 class DroneWebRTCProducer:
-    def __init__(self, basestation_id, source, stream_name="Unnamed Camera"):
+    def __init__(self, basestation_id, source, stream_name="Unnamed Drone"):
         self.basestation_id = basestation_id
         self.stream_name = stream_name
         self.source = source
@@ -20,7 +20,6 @@ class DroneWebRTCProducer:
     async def __on_start_stream(self):
         print("Stream Starting")
         self.pc = RTCPeerConnection()
-        self.source = self.source()
         self.source.connect()
         # Handle ICE candidates
         @self.pc.on("icecandidate")
@@ -86,7 +85,6 @@ class DroneWebRTCProducer:
         print("some")
         # generate session id
         # self.sid = str(uuid.uuid4())
-        self.name = f"{self.basestation_id}/{self.sid}"
         # response = await self.stub.Register(ServerBaseStation_pb2.RegisterProducerRequest(sid=self.sid, name=self.name))
         print("some")
         await self.__on_start_stream()
