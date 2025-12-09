@@ -13,13 +13,16 @@ from threading import Thread
 import redis
 import re
 import base64
+import _credentials
 
 # -------------------- Database --------------------
 # Retry connection logic for Docker startup
 max_retries = 5
 retry_delay = 2
 
-channel = grpc.aio.insecure_channel('localhost:50051')
+creds = grpc.ssl_channel_credentials(_credentials.ROOT_CERTIFICATE)
+
+channel = grpc.aio.secure_channel('localhost:50051', creds)
 stub = ServerBaseStation_pb2_grpc.WebserverDroneCommuncationDetailsStub(channel)
 
 for attempt in range(max_retries):

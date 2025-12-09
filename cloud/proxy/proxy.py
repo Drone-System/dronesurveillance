@@ -6,7 +6,7 @@ import ServerBaseStation_pb2_grpc
 import grpc
 from Database import Database
 import asyncio
-
+import _credentials
 
 async def main(signal):
 
@@ -26,8 +26,12 @@ async def main(signal):
     ServerBaseStation_pb2_grpc.add_CloudServicer_to_server(
         Cloud(database), server
     )
+
+    key = _credentials.SERVER_CERTIFICATE_KEY
+    cert = _credentials.SERVER_CERTIFICATE
+    creds = grpc.ssl_server_credentials([(key, cert)])
     listen_addr = "[::]:50051"
-    server.add_insecure_port(listen_addr)
+    server.add_secure_port(listen_addr, creds)
     print("Starting server on ", listen_addr, flush=True)
     await server.start()
 
