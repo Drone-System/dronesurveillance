@@ -46,6 +46,8 @@ class Database:
                 if not row[0]:
                     raise Exception("Basestation Name already registered try another name")
                     return -1
+                
+                cur.execute("UPDATE basestations SET active = True WHERE id = %s", (id, ))
 
             else:
                 cur.execute("CALL create_basestation(%s, %s)", (basestation_name, password))
