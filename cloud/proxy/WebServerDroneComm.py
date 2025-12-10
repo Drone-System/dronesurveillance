@@ -35,7 +35,8 @@ class WebserverDroneCommuncationDetails(ServerBaseStation_pb2_grpc.WebserverDron
         context: grpc.aio.ServicerContext,
     ) -> ServerBaseStation_pb2.AvailableDronesResponse:
         stream_ids = []
-        for stream_id in self.communication[request.basestation_id].keys():
-            name = self.communication[request.basestation_id][stream_id].name
-            stream_ids.append(ServerBaseStation_pb2.DroneInfo(id=stream_id, name=name))
+        if request.basestation_id in self.communication:
+            for stream_id in self.communication[request.basestation_id].keys():
+                name = self.communication[request.basestation_id][stream_id].name
+                stream_ids.append(ServerBaseStation_pb2.DroneInfo(id=stream_id, name=name))
         return ServerBaseStation_pb2.AvailableDronesResponse(info=stream_ids)
