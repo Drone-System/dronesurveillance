@@ -11,18 +11,16 @@ from ultralytics import YOLO
 
 from alert import send_alert_email
 
-REDIS_HOST = os.getenv("REDIS_HOST", "redisserver")   # same host name used in docker-compose
+REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
 REDIS_PORT = 6379
 REDIS_DB = 0
-
 MODEL_PATH = "yolov8n.pt"
 THREAT_CLASSES = os.getenv("THREAT_CLASSES", "person,knife,gun").split(",")
 CONFIDENCE_THRESHOLD = 0.50
 COOLDOWN_SECONDS = 20
-PROCESS_INTERVAL = 0.2      # YOLO inference every 200ms
+PROCESS_INTERVAL = 0.2
 
 cooldowns = {}
-
 model = YOLO(MODEL_PATH)
 model_names = model.names
 
@@ -43,7 +41,6 @@ def detect_threat(results):
 async def process_stream(channel, r):
     """Runs YOLO on the latest frame of this stream every N milliseconds."""
     print(f"[DETECTOR] Watching stream: {channel}")
-
     while True:
         frame_key = f"latest_frame_{channel}"
         heartbeat_key = f"heartbeat_{channel}"
@@ -80,17 +77,10 @@ async def process_stream(channel, r):
             print(f"[{channel}] THREAT DETECTED:", threats)
             cooldowns[channel] = time.time()
 
-            alert_msg = {
-                "channel": channel,
-                "detections": threats,
-                "timestamp": int(time.time())
-            }
-
-            # publish alert
-            await r.publish("alerts", str(alert_msg))
-
+            # Get annotated image with bounding boxes
+            annotated_frame = results[0].plot()  # Returns image with boxes drawn
             # send email
-            send_alert_email(channel, threats)
+            send_alert_email(channel, threats, annotated_frame)
 
         await asyncio.sleep(PROCESS_INTERVAL)
 
