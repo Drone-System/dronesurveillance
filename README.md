@@ -14,6 +14,33 @@ model deployment and tuning. 3. Cloud backend for alert processing and encrypted
 storage. 4. Dashboard development for authorized user interaction. 5. Final testing in
 simulated security incident scenarios.
 
+# Steps to run
+
+## Run cloud
+```
+python3 generate_keys.py
+cd cloud/proxy
+python3 -m grpc_tools.protoc -I../../protos --python_out=. --pyi_out=. --grpc_python_out=. ../../protos/ServerBaseStation.proto
+cd ../webserver
+python3 -m grpc_tools.protoc -I../../protos --python_out=. --pyi_out=. --grpc_python_out=. ../../protos/ServerBaseStation.proto
+docker compose up --build
+```
+
+## Run Basestation
+```
+cd base_station/core
+```
+Create .env following [README](base_station/core/README.md)
+
+```
+cd ..
+docker compose --env-file ./core/.env up --build
+cd core
+python3 main.py
+```
+
+
+
 
 #
 
