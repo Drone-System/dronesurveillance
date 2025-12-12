@@ -1,0 +1,43 @@
+@startuml Component Diagram BaseStation
+
+' left to right direction
+' #skinparam #TODO
+
+actor BasestationAdmin as "Basestation Admin"
+
+node BaseStation {
+
+port WebRtcIn
+port WebRtcOut
+port Frontend
+
+component WebServer {
+
+}
+
+database Database {
+
+}
+
+component core {
+
+}
+
+
+' core -right- WebRtcIn
+
+WebServer -left- Database
+
+Database -left- core
+
+Frontend -- WebServer
+
+core -- WebRtcIn
+core -- WebRtcOut
+
+
+}
+BasestationAdmin -- Frontend
+
+
+@enduml

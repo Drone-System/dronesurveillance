@@ -1,0 +1,20 @@
+@startuml "System Diagram"
+
+
+node Camera
+
+node Drone
+
+node BaseStation {
+     
+}
+
+node Cloud {
+
+}
+
+Drone -- BaseStation
+Camera -- BaseStation
+BaseStation -- Cloud
+
+@enduml
