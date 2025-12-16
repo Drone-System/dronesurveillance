@@ -1,0 +1,26 @@
+@startuml Sequence Diagram WebRtc
+
+participant db as "Database Manager"
+participant cameraman as "Camera Manager"
+participant Webrtc as "WebRTC Producer"
+participant Remote
+
+cameraman -> db : pollCameras()
+db -> cameraman : Available Cameras
+alt New Camera Detected
+    cameraman  -> Webrtc : Start(Camera)
+else 
+    cameraman -> cameraman : Sleep(10)
+end
+Webrtc -> Remote : ConnectRequest(Basestation_id)
+Remote -> Webrtc : ConnectResponse(Stream_id)
+
+Webrtc -> Remote : RegisterProducerRequest(Basestation_id, Stream_id, name)
+Remote -> Webrtc : RegisterProducerResponse(Stream_id, viewer_id)
+Webrtc -> Webrtc : Generate Offer
+Webrtc -> Remote : StreamOffer(Offer)
+Remote -> Remote : Generate Answer
+Remote -> Webrtc : StreamAnswer(Answer)
+Webrtc -> Remote : Stream Real-time Video using established protocols
+deactivate Webrtc
+@enduml

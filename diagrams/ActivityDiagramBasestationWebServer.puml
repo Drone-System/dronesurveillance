@@ -1,0 +1,17 @@
+@startuml Activity Diagram Web Server
+
+start
+partition Home Page {
+: Select device to add;
+note right: device can be a\ncamera or a drone
+}
+partition Select Device Page {
+: Show types of devices supported;
+: Select type of device;
+: Show needed fields\nfor type of device;
+: Fill needed fields\nfor type of device;
+: Submit;
+}
+end
+
+@enduml

@@ -1,14 +1,14 @@
 @startuml Component Diagram BaseStation
 
 ' left to right direction
-' #skinparam #TODO
+' skinparam Monochrome true
 
 actor BasestationAdmin as "Basestation Admin"
 
 node BaseStation {
 
-port WebRtcIn
-port WebRtcOut
+port WebRtc
+port Grpc
 port Frontend
 
 component WebServer {
@@ -26,14 +26,14 @@ component core {
 
 ' core -right- WebRtcIn
 
-WebServer -left- Database
+Database -right- WebServer
 
-Database -left- core
+core -- Database
 
-Frontend -- WebServer
+Frontend --down- WebServer
 
-core -- WebRtcIn
-core -- WebRtcOut
+core -- WebRtc
+core -- Grpc
 
 
 }
