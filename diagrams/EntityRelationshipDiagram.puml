@@ -1,0 +1,24 @@
+@startuml Entity Relationship Diagram Basestation
+
+' left to right direction
+
+entity cameras {
+    * id: INTEGER <<generated>>
+    --
+    * name: VARCHAR(255)
+    * camera_type: VARCHAR(50)
+    * config: JSONB
+    created_at: TIMESTAMP
+    updated_at: TIMESTAMP
+}
+entity drones {
+    * id: INTEGER <<generated>>
+    --
+    * name VARCHAR(255)
+    * drone_type VARCHAR(50)
+    * config JSONB
+    created_at: TIMESTAMP
+    updated_at: TIMESTAMP
+}
+
+@enduml
