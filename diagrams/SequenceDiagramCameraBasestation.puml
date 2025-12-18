@@ -1,15 +1,16 @@
-@startuml Sequence Diagram WebRtc
+@startuml Sequence Diagram WebRtc Cameras
 
 participant db as "Database Manager"
 participant cameraman as "Camera Manager"
 participant Webrtc as "WebRTC Producer"
 participant Remote
 
+loop
 cameraman -> db : pollCameras()
 db -> cameraman : Available Cameras
 alt New Camera Detected
     cameraman  -> Webrtc : Start(Camera)
-else 
+end
     cameraman -> cameraman : Sleep(10)
 end
 Webrtc -> Remote : ConnectRequest(Basestation_id)

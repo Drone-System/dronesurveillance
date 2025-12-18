@@ -1,5 +1,58 @@
 @startuml Cloud Component Diagram
 
+skinparam linetype ortho
+
+actor User as "Basestation User"
+
+node Remote as "Remote Server/Cloud" {
+
+port WebRtc
+port Grpc
+port Frontend
+port Email
+
+
+component proxy {
+
+}
+
+database Database {
+}
+
+component WebServer {
+
+}
+
+component redis as "Redis Server"
+
+component VideoStore as "Video Storage"
+
+component VideoEvaluator as "Video Evalutator"
+
+component Notifier
+
+
+
+proxy -(0- redis
+redis -0)- VideoStore
+redis -0)- VideoEvaluator
+redis -0)- WebServer
+
+WebServer -up- Frontend
+proxy -right- Database
+Database -right- WebServer
+
+VideoEvaluator --up- Notifier
+
+Notifier - Email
+
+
+proxy - WebRtc
+proxy - Grpc
+
+
+}
+User -- Frontend
 
 
 @enduml
