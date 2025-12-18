@@ -1,0 +1,59 @@
+@startuml Camera Class Diagram
+
+abstract class VideoStreamTrack {
+    + {abstract} async void recv()
+}
+
+note right of VideoStreamTrack : This class is provided \nby aiortc library
+
+class IpCamera {
+    - string connection_string
+    + async void recv()
+}
+class UsbCamera {
+    - int id
+    + async void recv()
+}
+
+abstract class IDrone {
+    + void decode(string)
+    + {abstract} void connect()
+    + {abstract} void disconnect()
+    + {abstract} void moveFront()
+    + {abstract} void moveBack()
+    + {abstract} void moveLeft()
+    + {abstract} void moveRight()
+    + {abstract} void rotateLeft()
+    + {abstract} void rotateRight()
+    + {abstract} void sendCommand()
+    + {abstract} VideoStreamTrack getVideoTrack()
+    + {abstract} bool isFlying()
+}
+
+class Movement {
+    - int back_front
+    - int left_right
+    - int down_up
+    - int yaw
+    + void setBackFront(int)
+    + void setLeftRight(int)
+    + void setDownUp(int)
+    + void setYaw(int)
+}
+
+class DjiTelloDrone {
+    - bool flying
+}
+
+class DjiTelloVideoTrack {
+    + async void recv()
+}
+
+VideoStreamTrack <|-down- IpCamera
+VideoStreamTrack <|-down- UsbCamera
+VideoStreamTrack <|-- DjiTelloVideoTrack
+IDrone <|-down- DjiTelloDrone
+DjiTelloDrone o-right-"1" DjiTelloVideoTrack
+Movement "1"-right-o DjiTelloDrone
+
+@enduml

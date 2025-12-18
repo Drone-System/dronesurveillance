@@ -1,0 +1,44 @@
+@startuml Activity Diagram Cloud
+
+|Login Page|
+start
+if (has user) then (yes) 
+    :login;
+else (no)
+    :register;
+    :login;
+endif
+|Home Page|
+:Show options;
+switch ()
+case ()
+    :Click Add Basestation;
+case ()
+    :Click on a Basestation;
+    |Basestation Page|
+        :List Basestation Options;
+        switch ()
+        case ()
+            :Watch cameras;
+        case ()
+            :Drones;
+        case ()
+            :View Recordings;
+        if (is owner?) then (yes)
+            |User Management page|
+            switch ()
+            case ()
+                :Add User to Basestation;
+            case ()
+                :Remove User to Basestation;
+            endswitch
+        endif
+        |Basestation Page|
+        endswitch
+        |Home Page|
+endswitch
+
+end
+
+
+@enduml

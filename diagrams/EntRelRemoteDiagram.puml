@@ -1,0 +1,36 @@
+@startuml Database ERD
+
+skinparam linetype ortho
+skinparam entityStyle rectangle
+skinparam shadowing false
+
+entity "users" as users {
+  + id : serial <<PK>>
+  --
+  username : text <<UNIQUE>>
+  password_salt : uuid
+  password : text
+}
+
+entity "basestations" as basestations {
+  + id : serial <<PK>>
+  --
+  name : text <<UNIQUE>>
+  password_salt : uuid
+  password : text
+  active : boolean
+}
+
+entity "users_to_basestations" as utb {
+  * user_id : integer <<FK>>
+  * basestation_id : integer <<FK>>
+  --
+  owner : boolean
+}
+
+' ===== Relationships =====
+
+users ||--o{ utb : "has access"
+basestations ||--o{ utb : "assigned to"
+
+@enduml

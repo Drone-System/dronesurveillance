@@ -1,0 +1,41 @@
+@startuml Sequence Diagram WebRtc Drones
+
+participant db as "Database Manager"
+participant cameraman as "Drone Manager"
+participant Webrtc as "WebRTC Producer"
+participant Remote
+actor User
+
+loop
+cameraman -> db : pollDrones()
+db -> cameraman : Available Drones
+
+    alt New Drone Detected
+        cameraman  -> Webrtc : Start(Drone)
+    end
+    cameraman -> cameraman : Sleep(10)
+end
+
+Webrtc -> Remote : ConnectRequest(Basestation_id)
+Remote -> Webrtc : ConnectResponse(Stream_id)
+
+User -> Remote : RequestStream(drone_id)
+activate Remote #009900
+
+loop Poll
+    Webrtc -> Remote : PollRequest(Basestation_id, Stream_id)
+    Remote -> Webrtc : PollResponse(stream_needed)
+    break stream_need == True
+        Webrtc -> Webrtc : Generate Offer
+        Webrtc -> Remote : StreamOffer(Offer)
+    end
+end
+
+Remote -> Remote : Generate Answer
+Remote -> Webrtc : StreamAnswer(Answer)
+deactivate Remote
+loop WebRtc
+Webrtc -> User : Stream Real-time Video using established protocols
+User -> Webrtc : Stream Real-time commands
+end
+@enduml
