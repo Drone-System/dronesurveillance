@@ -76,11 +76,11 @@ CREATE OR REPLACE FUNCTION public.verify_user(in_username text, in_password text
  END;                                                                                                                  
  $procedure$;
 -- data:
-call create_user('casper', 'stdpw1234');
-call create_basestation('basestation_one', 'qwerty123');
-call create_basestation('based station', '420!nice');
-call create_basestation('outsider base station', 'someone else');
-insert into users_to_basestations(user_id, basestation_id, owner) VALUES (1, 1, TRUE);
+--call create_user('casper', 'stdpw1234');
+--call create_basestation('basestation_one', 'qwerty123');
+--call create_basestation('based station', '420!nice');
+--call create_basestation('outsider base station', 'someone else');
+--insert into users_to_basestations(user_id, basestation_id, owner) VALUES (1, 1, TRUE);
 -- insert into groups(name) VALUES ('the best group');
 -- insert into users_to_groups(user_id, group_id, owner) VALUES (1, 1, TRUE);
 -- insert into basestations_to_groups(basestation_id, group_id) VALUES (1, 1),(2, 1);
